@@ -2,53 +2,64 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Volumetric Display Side-by-Side</title>
+  <title>Volumetric Display</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    body { margin: 0; display: flex; height: 100vh; }
-    #formulaPlot, #iersPlot { width: 50%; height: 100%; }
+    body { margin: 0; display: flex; }
+    #iersPlot, #formulaPlot { width: 50vw; height: 100vh; }
   </style>
 </head>
 <body>
-  <div id="formulaPlot"></div>
   <div id="iersPlot"></div>
+  <div id="formulaPlot"></div>
 
   <script>
+    // Fetch volumetric JSON with fallback
     fetch('volumetric_data.json')
-      .then(res => res.json())
+      .then(response => response.json())
       .then(data => {
-        const formulaData = data.formula || [];
-        const iersData = data.iers || [];
+        const iersData = data.iers || [{"x":0,"y":0,"z":0}];
+        const formulaData = data.formula || [{"x":0,"y":0,"z":0}];
 
-        // Formula Trace
-        const formulaTrace = {
-          x: formulaData.map(p => p.x),
-          y: formulaData.map(p => p.y),
-          z: formulaData.map(p => p.z),
-          mode: 'markers',
-          type: 'scatter3d',
-          marker: { size: 3, color: 'blue' }
-        };
+        // Helper function to map x, y, z
+        function mapXYZ(arr) {
+          return {
+            x: arr.map(p => p.x),
+            y: arr.map(p => p.y),
+            z: arr.map(p => p.z)
+          };
+        }
 
-        // IERS Trace
+        // IERS plot
+        const iersXYZ = mapXYZ(iersData);
         const iersTrace = {
-          x: iersData.map(p => p.x),
-          y: iersData.map(p => p.y),
-          z: iersData.map(p => p.z),
+          x: iersXYZ.x,
+          y: iersXYZ.y,
+          z: iersXYZ.z,
           mode: 'markers',
           type: 'scatter3d',
-          marker: { size: 3, color: 'red' }
+          marker: { size: 3, color: iersXYZ.z, colorscale: 'Viridis', opacity: 0.8 }
         };
+        const iersLayout = { margin: { l:0,r:0,b:0,t:0 }, scene:{ xaxis:{title:'dX'}, yaxis:{title:'dY'}, zaxis:{title:'UT1-UTC'} } };
+        Plotly.newPlot('iersPlot', [iersTrace], iersLayout, {responsive: true});
 
-        const layout = {
-          margin: { l: 0, r: 0, b: 0, t: 0 },
-          scene: { xaxis:{title:'X'}, yaxis:{title:'Y'}, zaxis:{title:'Z'} }
+        // Formula plot
+        const formulaXYZ = mapXYZ(formulaData);
+        const formulaTrace = {
+          x: formulaXYZ.x,
+          y: formulaXYZ.y,
+          z: formulaXYZ.z,
+          mode: 'markers',
+          type: 'scatter3d',
+          marker: { size: 3, color: formulaXYZ.z, colorscale: 'Plasma', opacity: 0.8 }
         };
+        const formulaLayout = { margin: { l:0,r:0,b:0,t:0 }, scene:{ xaxis:{title:'X'}, yaxis:{title:'Y'}, zaxis:{title:'Z'} } };
+        Plotly.newPlot('formulaPlot', [formulaTrace], formulaLayout, {responsive: true});
 
-        Plotly.newPlot('formulaPlot', [formulaTrace], layout, {responsive:true});
-        Plotly.newPlot('iersPlot', [iersTrace], layout, {responsive:true});
       })
-      .catch(err => console.error("Error loading volumetric JSON:", err));
+      .catch(err => {
+        console.error("Error loading volumetric JSON:", err);
+      });
   </script>
 </body>
 </html>
