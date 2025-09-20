@@ -9,14 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
 
 <script>
-  // Catch global JS errors
-  window.onerror = function(msg, url, lineNo, columnNo, error) {
-    alert("Error: " + msg + "\nLine: " + lineNo + "\nColumn: " + columnNo);
-    return false;
-  };
-
-  console.log("Script started");
-
+window.onload = function() {
   // Scene setup
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -36,21 +29,13 @@
     })
     .then(data => {
       console.log("JSON data loaded:", data.length, "points");
-
-      if (!Array.isArray(data)) {
-        alert("Data is not an array!");
-        return;
-      }
-
-      data.forEach((point, i) => {
+      data.forEach(point => {
         const geometry = new THREE.SphereGeometry(0.3, 16, 16);
         const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         const sphere = new THREE.Mesh(geometry, material);
         sphere.position.set(point.x, point.y, point.z);
         scene.add(sphere);
-        if (i < 5) console.log("Point added:", point);
       });
-
       animate();
     })
     .catch(err => {
@@ -62,9 +47,7 @@
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
   }
-
-  console.log("Script loaded successfully");
-
+};
 </script>
 </body>
 </html>
