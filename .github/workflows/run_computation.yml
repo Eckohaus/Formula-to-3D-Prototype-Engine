@@ -1,0 +1,30 @@
+name: Compute Volumetric Data
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+
+    - name: Install dependencies
+      run: pip install numpy
+
+    - name: Run volumetric computation
+      run: python engine/compute.py
+
+    - name: Commit and push output
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add visualization/data/volumetric_data.json
+        git commit -m "Update volumetric dataset [skip ci]" || echo "No changes to commit"
+        git push
