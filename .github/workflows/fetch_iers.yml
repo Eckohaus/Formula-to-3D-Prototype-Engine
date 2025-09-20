@@ -1,4 +1,4 @@
-name: Fetch IERS Data
+name: Fetch IERS Bulletin A Data
 
 on:
   workflow_dispatch:
@@ -25,15 +25,14 @@ jobs:
           import requests
           import json
 
-          # Download the IERS Bulletin B data
-          url = "ftp://hpiers.obspm.fr/iers/bul/bulb_new/bulletinb.txt"
+          # Download the IERS Bulletin A data
+          url = "https://datacenter.iers.org/data/csv/bulletina.longtime.csv"
           response = requests.get(url)
-          with open("bulletinb.txt", "wb") as f:
+          with open("bulletina.longtime.csv", "wb") as f:
               f.write(response.content)
 
           # Read the data into a pandas DataFrame
-          df = pd.read_csv("bulletinb.txt", sep="\s+", header=None, comment=";", skiprows=1)
-          df.columns = ["Year", "Month", "Day", "MJD", "x", "y", "UT1-UTC", "dX", "dY", "x_err", "y_err", "UT1_err", "X_err", "Y_err"]
+          df = pd.read_csv("bulletina.longtime.csv", header=0, comment=";", skiprows=1)
 
           # Select relevant columns and convert to JSON
           points = df[["x", "y", "dX", "dY"]].to_dict(orient="records")
@@ -46,5 +45,5 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add docs/volumetric_data.json
-          git commit -m "Update volumetric data from IERS Bulletin B"
+          git commit -m "Update volumetric data from IERS Bulletin A"
           git push
