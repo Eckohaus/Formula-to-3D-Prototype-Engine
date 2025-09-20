@@ -9,7 +9,7 @@ Prototype engine to convert physics formulas (e.g., E = mc2) into interactive vo
 ## Features
 - Compute volumetric data from formulas on a 3D grid
 - Simple REST API to trigger computation
-- Interactive 3D visualization using WebGL/Three.js
+- Interactive 3D visualization using Plotly.js
 - Mobile-accessible and cloud-deployable
 
 ---
