@@ -1,0 +1,56 @@
+name: Fetch IERS Data
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: pip install pandas requests
+
+      - name: Fetch IERS CSV and convert to JSON
+        run: |
+          python - <<EOF
+          import pandas as pd
+          import requests
+          import json
+
+          # Example CSV URL (replace with actual IERS CSV endpoint)
+          csv_url = "https://datacenter.iers.org/data/UTC_PolarMotion.csv"
+          r = requests.get(csv_url)
+          with open("api/iers.csv", "wb") as f:
+              f.write(r.content)
+
+          # Read CSV
+          df = pd.read_csv("api/iers.csv")
+
+          # Convert to x, y, z points (map columns to x/y/z)
+          points = []
+          for i, row in df.iterrows():
+              points.append({
+                  "x": float(row["x_column"]),  # Replace with actual column name
+                  "y": float(row["y_column"]),
+                  "z": float(row["z_column"])
+              })
+
+          # Write JSON to docs folder
+          with open("docs/volumetric_data.json", "w") as f:
+              json.dump(points, f)
+          EOF
+
+      - name: Commit updated JSON
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add docs/volumetric_data.json
+          git commit -m "Update volumetric data from IERS"
+          git push
