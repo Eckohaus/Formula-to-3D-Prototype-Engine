@@ -44,6 +44,11 @@ formula-to-3d-prototype/
 └── LICENSE
 ```
 
+## Current Status
+- Static frontend fully deployed via GitHub Pages at [https://toko.eckohaus.com](https://toko.eckohaus.com)
+- Volumetric display is rendering; formula placeholder in place
+- Scheduled GitHub Actions update the IERS data daily at 02:00 UTC
+
 ## Future Extensions
 - Replace placeholder formula with more complex physics formulas (QCD, energy fields)
 - Integrate ML pipelines
