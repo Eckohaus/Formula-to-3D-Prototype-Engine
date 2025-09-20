@@ -1,20 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
   <title>Volumetric Display</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body { margin: 0; }
+    #volumetricPlot { width: 100vw; height: 100vh; }
+  </style>
 </head>
 <body>
-  <div id="plot" style="width: 100%; height: 100vh;"></div>
+  <div id="volumetricPlot"></div>
 
   <script>
-    // Load the JSON volumetric data
+    // Fetch filtered volumetric JSON
     fetch('volumetric_data.json')
-      .then(resp => resp.json())
+      .then(response => response.json())
       .then(data => {
+        // Separate x, y, z arrays
         const x = data.map(p => p.x);
         const y = data.map(p => p.y);
-        const z = data.map(p => p.dX); // choose the component to visualize
+        const z = data.map(p => p.z);
 
         const trace = {
           x: x,
@@ -22,12 +28,28 @@
           z: z,
           mode: 'markers',
           type: 'scatter3d',
-          marker: { size: 4, color: 'red' }
+          marker: {
+            size: 3,
+            color: z,             // color mapped to z
+            colorscale: 'Viridis',
+            opacity: 0.8
+          }
         };
 
-        Plotly.newPlot('plot', [trace], { margin: { t:0 } });
+        const layout = {
+          margin: { l: 0, r: 0, b: 0, t: 0 },
+          scene: {
+            xaxis: { title: 'dX' },
+            yaxis: { title: 'dY' },
+            zaxis: { title: 'UT1-UTC' }
+          }
+        };
+
+        Plotly.newPlot('volumetricPlot', [trace], layout, {responsive: true});
       })
-      .catch(err => console.error('Error loading JSON:', err));
+      .catch(err => {
+        console.error("Error loading volumetric JSON:", err);
+      });
   </script>
 </body>
 </html>
