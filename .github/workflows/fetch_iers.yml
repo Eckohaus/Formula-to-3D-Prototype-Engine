@@ -15,34 +15,28 @@ jobs:
           python-version: "3.x"
 
       - name: Install dependencies
-        run: pip install pandas requests
+        run: |
+          pip install pandas requests
 
-      - name: Fetch IERS CSV and convert to JSON
+      - name: Fetch and process IERS data
         run: |
           python - <<EOF
           import pandas as pd
           import requests
           import json
 
-          # Example CSV URL (replace with actual IERS CSV endpoint)
-          csv_url = "https://datacenter.iers.org/data/UTC_PolarMotion.csv"
-          r = requests.get(csv_url)
-          with open("api/iers.csv", "wb") as f:
-              f.write(r.content)
+          # Download the IERS Bulletin B data
+          url = "ftp://hpiers.obspm.fr/iers/bul/bulb_new/bulletinb.txt"
+          response = requests.get(url)
+          with open("bulletinb.txt", "wb") as f:
+              f.write(response.content)
 
-          # Read CSV
-          df = pd.read_csv("api/iers.csv")
+          # Read the data into a pandas DataFrame
+          df = pd.read_csv("bulletinb.txt", sep="\s+", header=None, comment=";", skiprows=1)
+          df.columns = ["Year", "Month", "Day", "MJD", "x", "y", "UT1-UTC", "dX", "dY", "x_err", "y_err", "UT1_err", "X_err", "Y_err"]
 
-          # Convert to x, y, z points (map columns to x/y/z)
-          points = []
-          for i, row in df.iterrows():
-              points.append({
-                  "x": float(row["x_column"]),  # Replace with actual column name
-                  "y": float(row["y_column"]),
-                  "z": float(row["z_column"])
-              })
-
-          # Write JSON to docs folder
+          # Select relevant columns and convert to JSON
+          points = df[["x", "y", "dX", "dY"]].to_dict(orient="records")
           with open("docs/volumetric_data.json", "w") as f:
               json.dump(points, f)
           EOF
@@ -52,5 +46,5 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add docs/volumetric_data.json
-          git commit -m "Update volumetric data from IERS"
+          git commit -m "Update volumetric data from IERS Bulletin B"
           git push
