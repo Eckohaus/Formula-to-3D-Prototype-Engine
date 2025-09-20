@@ -43,4 +43,4 @@ jobs:
         if: env.no_changes == 'false'
         run: |
           git commit -m "Update volumetric_data.json from IERS"
-          git push origin githubpages
+          git push origin gh-pages
