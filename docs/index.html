@@ -6,23 +6,35 @@
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
     body { margin: 0; }
-    #volumetricPlot { width: 100vw; height: 100vh; }
+    .plot-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      gap: 2vw; /* small space between plots */
+    }
+    .plot {
+      width: 45vw;
+      height: 90vh;
+    }
   </style>
 </head>
 <body>
-  <div id="volumetricPlot"></div>
+  <div class="plot-container">
+    <div id="volumetricPlotIERS" class="plot"></div>
+    <div id="volumetricPlotFormula" class="plot"></div>
+  </div>
 
   <script>
-    // Fetch filtered volumetric JSON
+    // ---- Volumetric Display 1: IERS Data ----
     fetch('volumetric_data.json')
       .then(response => response.json())
       .then(data => {
-        // Separate x, y, z arrays
         const x = data.map(p => p.x);
         const y = data.map(p => p.y);
         const z = data.map(p => p.z);
 
-        const trace = {
+        const traceIERS = {
           x: x,
           y: y,
           z: z,
@@ -30,26 +42,59 @@
           type: 'scatter3d',
           marker: {
             size: 3,
-            color: z,             // color mapped to z
+            color: z,
             colorscale: 'Viridis',
             opacity: 0.8
           }
         };
 
-        const layout = {
+        const layoutIERS = {
           margin: { l: 0, r: 0, b: 0, t: 0 },
-          scene: {
-            xaxis: { title: 'dX' },
-            yaxis: { title: 'dY' },
-            zaxis: { title: 'UT1-UTC' }
-          }
+          scene: { xaxis: { title: 'dX' }, yaxis: { title: 'dY' }, zaxis: { title: 'UT1-UTC' } },
+          title: 'IERS Data Volumetric Display'
         };
 
-        Plotly.newPlot('volumetricPlot', [trace], layout, {responsive: true});
+        Plotly.newPlot('volumetricPlotIERS', [traceIERS], layoutIERS, {responsive: true});
       })
-      .catch(err => {
-        console.error("Error loading volumetric JSON:", err);
+      .catch(err => console.error("Error loading IERS JSON:", err));
+
+    // ---- Volumetric Display 2: Placeholder Formula ----
+    // Example: E = mc² mapped to random 3D points for now
+    const formulaData = [];
+    const numPoints = 100; // adjust density
+    for (let i=0; i<numPoints; i++){
+      formulaData.push({
+        x: Math.random()*10,
+        y: Math.random()*10,
+        z: Math.random()*10
       });
+    }
+
+    const xF = formulaData.map(p => p.x);
+    const yF = formulaData.map(p => p.y);
+    const zF = formulaData.map(p => p.z);
+
+    const traceFormula = {
+      x: xF,
+      y: yF,
+      z: zF,
+      mode: 'markers',
+      type: 'scatter3d',
+      marker: {
+        size: 3,
+        color: zF,
+        colorscale: 'Cividis',
+        opacity: 0.8
+      }
+    };
+
+    const layoutFormula = {
+      margin: { l: 0, r: 0, b: 0, t: 0 },
+      scene: { xaxis: { title: 'X' }, yaxis: { title: 'Y' }, zaxis: { title: 'Z' } },
+      title: 'Formula Placeholder Volumetric Display'
+    };
+
+    Plotly.newPlot('volumetricPlotFormula', [traceFormula], layoutFormula, {responsive: true});
   </script>
 </body>
 </html>
