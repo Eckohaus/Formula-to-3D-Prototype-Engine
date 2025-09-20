@@ -1,57 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Volumetric Display</title>
+  <title>Volumetric Plot - TOCO</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    body { margin: 0; overflow: hidden; }
-    canvas { display: block; }
+    body { margin: 0; }
+    #plotDiv { width: 100vw; height: 100vh; }
   </style>
 </head>
 <body>
 
-<script type="module">
-  // Import Three.js from CDN
-  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
+<div id="plotDiv"></div>
 
-  // Scene setup
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-  const renderer = new THREE.WebGLRenderer({antialias: true});
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
-
-  camera.position.z = 20;
-
+<script>
   // Load volumetric data
   fetch('volumetric_data.json')
     .then(response => response.json())
     .then(data => {
-      data.forEach(point => {
-        const geometry = new THREE.SphereGeometry(0.3, 12, 12);
-        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        const sphere = new THREE.Mesh(geometry, material);
-        sphere.position.set(point.x, point.y, point.z);
-        scene.add(sphere);
-      });
-      animate();
+      // Assuming JSON structure: [{x:1,y:2,z:3}, ...]
+      const x = data.map(p => p.x);
+      const y = data.map(p => p.y);
+      const z = data.map(p => p.z);
+
+      const trace = {
+        x: x,
+        y: y,
+        z: z,
+        mode: 'markers',
+        type: 'scatter3d',
+        marker: {
+          size: 3,
+          color: z, // Color by Z-axis
+          colorscale: 'Viridis',
+          opacity: 0.8
+        }
+      };
+
+      const layout = {
+        title: 'Volumetric 3D Plot',
+        scene: {
+          xaxis: { title: 'X' },
+          yaxis: { title: 'Y' },
+          zaxis: { title: 'Z' }
+        }
+      };
+
+      Plotly.newPlot('plotDiv', [trace], layout);
     })
     .catch(err => {
-      console.error('Error loading JSON:', err);
+      console.error('Error loading volumetric data:', err);
       alert('Could not load volumetric data.');
     });
-
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-  }
-
-  // Handle window resize
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth/window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-
 </script>
 
 </body>
