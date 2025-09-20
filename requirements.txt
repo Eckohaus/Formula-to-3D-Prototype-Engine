@@ -1,0 +1,6 @@
+pandas
+requests
+numpy
+scipy
+fastapi        # if using API endpoints
+uvicorn        # for serving FastAPI locally or on cloud
