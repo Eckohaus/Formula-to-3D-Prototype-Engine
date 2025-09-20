@@ -33,15 +33,14 @@ Prototype engine to convert physics formulas (e.g., E = mc2) into interactive vo
 ```
 formula-to-3d-prototype/
 ├── engine/
-│   ├── compute.py            # Original computational engine (placeholder or formula processing)
-│   └── fetch_iers_data.py    # New script to pull, filter, and convert IERS data into JSON
-├── api/                      # API endpoints  
-│   └── main.py               # REST API using FastAPI or Flask  
-├── docs/                     # GitHub Pages site (serves static files)  
-│   ├── index.html            # Example WebGL/Three.js front-end  
-│   └── volumetric_data.json  # Placeholder volumetric data  
-├── requirements.txt          # Python dependencies  
-├── README.md                 # Project documentation  
+│   ├── compute.py              # Original computational engine (placeholder formula)
+│   └── fetch_iers_data.py      # New script to pull, filter, and convert IERS data into JSON
+├── api/                        # REST API endpoints (optional)
+├── docs/                       # GitHub Pages folder
+│   ├── index.html
+│   └── volumetric_data.json
+├── requirements.txt
+├── README.md
 └── LICENSE
 ```
 
