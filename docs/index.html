@@ -2,57 +2,56 @@
 <html>
 <head>
   <title>Volumetric Display</title>
-  <style>body { margin: 0; }</style>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; }
+  </style>
 </head>
 <body>
 
-<!-- Load latest Three.js from CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r180/three.min.js"></script>
+<script type="module">
+  // Import Three.js from CDN
+  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 
-<script>
-  window.onload = function() {
+  // Scene setup
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({antialias: true});
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
 
-    // Scene setup
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-    camera.position.z = 20;
+  camera.position.z = 20;
 
-    // Load volumetric data from JSON
-    fetch('volumetric_data.json')
-      .then(response => {
-        if (!response.ok) throw new Error("HTTP error " + response.status);
-        return response.json();
-      })
-      .then(data => {
-        if (!Array.isArray(data)) {
-          alert("Volumetric data is not an array!");
-          return;
-        }
-
-        data.forEach(point => {
-          const geometry = new THREE.SphereGeometry(0.3, 16, 16);
-          const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-          const sphere = new THREE.Mesh(geometry, material);
-          sphere.position.set(point.x, point.y, point.z);
-          scene.add(sphere);
-        });
-
-        animate();
-      })
-      .catch(err => {
-        alert("Error loading volumetric data: " + err.message);
-        console.error(err);
+  // Load volumetric data
+  fetch('volumetric_data.json')
+    .then(response => response.json())
+    .then(data => {
+      data.forEach(point => {
+        const geometry = new THREE.SphereGeometry(0.3, 12, 12);
+        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const sphere = new THREE.Mesh(geometry, material);
+        sphere.position.set(point.x, point.y, point.z);
+        scene.add(sphere);
       });
+      animate();
+    })
+    .catch(err => {
+      console.error('Error loading JSON:', err);
+      alert('Could not load volumetric data.');
+    });
 
-    function animate() {
-      requestAnimationFrame(animate);
-      renderer.render(scene, camera);
-    }
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+  }
 
-  }; // end window.onload
+  // Handle window resize
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
 </script>
 
 </body>
