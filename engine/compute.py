@@ -1,27 +1,22 @@
 import json
-import os
 import numpy as np
 
-# Output folder
-output_dir = "../visualization/data"
-os.makedirs(output_dir, exist_ok=True)
+# Example: placeholder formula data (E = mc^2)
+formula_points = [
+    {"x": x, "y": y, "z": x*y*0.1}  # just a simple mapping for demo
+    for x in range(10)
+    for y in range(10)
+]
 
-# Placeholder formula: E = mc2
-c = 3e8  # speed of light in m/s
+# Load IERS data if needed, or leave empty for now
+iers_points = []  # Could be fetched from fetch_iers_data.py
 
-# Example mass grid (3D 5x5x5)
-mass_grid = np.linspace(1, 5, 5)
-volumetric_data = []
+# Combine into JSON
+volumetric_data = {
+    "iers": iers_points,
+    "formula": formula_points
+}
 
-for x in mass_grid:
-    for y in mass_grid:
-        for z in mass_grid:
-            E = x * c**2  # simple placeholder
-            volumetric_data.append({"x": x, "y": y, "z": z, "E": E})
-
-# Save as JSON
-output_file = os.path.join(output_dir, "volumetric_data.json")
-with open(output_file, "w") as f:
+# Save JSON
+with open("docs/volumetric_data.json", "w") as f:
     json.dump(volumetric_data, f, indent=2)
-
-print(f"Volumetric data saved to {output_file}")
