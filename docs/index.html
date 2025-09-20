@@ -1,39 +1,78 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Volumetric Display</title>
-  <style>body { margin: 0; }</style>
+  <title>Volumetric Display Test</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; }
+  </style>
 </head>
 <body>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
   <script>
     // Scene setup
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    camera.position.z = 20;
+    // Move camera closer
+    camera.position.z = 10;
 
-    // Load volumetric data (updated path)
+    // Add a test cube
+    const testCube = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+    );
+    scene.add(testCube);
+
+    // Load volumetric JSON points
     fetch('volumetric_data.json')
-      .then(response => response.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to load JSON');
+        return res.json();
+      })
       .then(data => {
+        console.log('Volumetric data loaded:', data);
         data.forEach(point => {
-          const geometry = new THREE.SphereGeometry(0.3, 16, 16);
-          const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-          const sphere = new THREE.Mesh(geometry, material);
+          const sphere = new THREE.Mesh(
+            new THREE.SphereGeometry(0.5, 16, 16), // slightly bigger spheres
+            new THREE.MeshBasicMaterial({ color: 0xff0000 })
+          );
           sphere.position.set(point.x, point.y, point.z);
           scene.add(sphere);
         });
-        animate();
+      })
+      .catch(err => {
+        console.error(err);
+        const msg = document.createElement('div');
+        msg.innerText = 'Error loading volumetric data';
+        msg.style.color = 'red';
+        msg.style.fontSize = '24px';
+        document.body.appendChild(msg);
       });
 
+    // Animation loop
     function animate() {
       requestAnimationFrame(animate);
+      // Slowly rotate scene to see objects
+      scene.rotation.y += 0.01;
       renderer.render(scene, camera);
     }
+    animate();
+
+    // Resize handling
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
   </script>
 </body>
 </html>
