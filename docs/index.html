@@ -1,78 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Volumetric Display Test</title>
-  <style>
-    body { margin: 0; overflow: hidden; }
-    canvas { display: block; }
-  </style>
+  <title>Volumetric Display</title>
+  <style>body { margin: 0; }</style>
 </head>
 <body>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
-  <script>
-    // Scene setup
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
 
-    // Move camera closer
-    camera.position.z = 10;
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
 
-    // Add a test cube
-    const testCube = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-    );
-    scene.add(testCube);
+<script>
+  // Catch global JS errors
+  window.onerror = function(msg, url, lineNo, columnNo, error) {
+    alert("Error: " + msg + "\nLine: " + lineNo + "\nColumn: " + columnNo);
+    return false;
+  };
 
-    // Load volumetric JSON points
-    fetch('volumetric_data.json')
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to load JSON');
-        return res.json();
-      })
-      .then(data => {
-        console.log('Volumetric data loaded:', data);
-        data.forEach(point => {
-          const sphere = new THREE.Mesh(
-            new THREE.SphereGeometry(0.5, 16, 16), // slightly bigger spheres
-            new THREE.MeshBasicMaterial({ color: 0xff0000 })
-          );
-          sphere.position.set(point.x, point.y, point.z);
-          scene.add(sphere);
-        });
-      })
-      .catch(err => {
-        console.error(err);
-        const msg = document.createElement('div');
-        msg.innerText = 'Error loading volumetric data';
-        msg.style.color = 'red';
-        msg.style.fontSize = '24px';
-        document.body.appendChild(msg);
+  console.log("Script started");
+
+  // Scene setup
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+  camera.position.z = 20;
+
+  console.log("Renderer and camera initialized");
+
+  // Load volumetric data
+  fetch('volumetric_data.json')
+    .then(response => {
+      console.log("Fetch response received");
+      if (!response.ok) throw new Error("HTTP error " + response.status);
+      return response.json();
+    })
+    .then(data => {
+      console.log("JSON data loaded:", data.length, "points");
+
+      if (!Array.isArray(data)) {
+        alert("Data is not an array!");
+        return;
+      }
+
+      data.forEach((point, i) => {
+        const geometry = new THREE.SphereGeometry(0.3, 16, 16);
+        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const sphere = new THREE.Mesh(geometry, material);
+        sphere.position.set(point.x, point.y, point.z);
+        scene.add(sphere);
+        if (i < 5) console.log("Point added:", point);
       });
 
-    // Animation loop
-    function animate() {
-      requestAnimationFrame(animate);
-      // Slowly rotate scene to see objects
-      scene.rotation.y += 0.01;
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    // Resize handling
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      animate();
+    })
+    .catch(err => {
+      alert("Error loading volumetric data: " + err.message);
+      console.error(err);
     });
-  </script>
+
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+  }
+
+  console.log("Script loaded successfully");
+
+</script>
 </body>
 </html>
