@@ -1,0 +1,57 @@
+name: Update Volumetric Data
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight UTC
+  workflow_dispatch:     # Also allow manual trigger
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          pip install pandas requests
+
+      - name: Fetch and process IERS JSON
+        run: |
+          python - <<EOF
+          import pandas as pd
+          import requests
+          import json
+
+          # URL to the public IERS JSON or CSV
+          url = "https://datacenter.iers.org/data/json/bulletina.final.json"
+          response = requests.get(url)
+          data = response.json()
+
+          # Filter only the columns needed for your 3D plot
+          filtered = []
+          for row in data:
+              filtered.append({
+                  "x": row.get("dX"),
+                  "y": row.get("dY"),
+                  "z": row.get("UT1_UTC")  # or another parameter for z-axis
+              })
+
+          # Write filtered JSON to docs folder
+          with open("docs/volumetric_data.json", "w") as f:
+              json.dump(filtered, f)
+          EOF
+
+      - name: Commit updated JSON
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add docs/volumetric_data.json
+          git commit -m "Automated update of volumetric JSON"
+          git push
