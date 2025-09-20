@@ -1,57 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Volumetric Plot - Toko</title>
+  <title>Volumetric Display</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  <style>
-    body { margin: 0; }
-    #plotDiv { width: 100vw; height: 100vh; }
-  </style>
 </head>
 <body>
+  <div id="plot" style="width: 100%; height: 100vh;"></div>
 
-<div id="plotDiv"></div>
+  <script>
+    // Load the JSON volumetric data
+    fetch('volumetric_data.json')
+      .then(resp => resp.json())
+      .then(data => {
+        const x = data.map(p => p.x);
+        const y = data.map(p => p.y);
+        const z = data.map(p => p.dX); // choose the component to visualize
 
-<script>
-  // Load volumetric data
-  fetch('volumetric_data.json')
-    .then(response => response.json())
-    .then(data => {
-      // Assuming JSON structure: [{x:1,y:2,z:3}, ...]
-      const x = data.map(p => p.x);
-      const y = data.map(p => p.y);
-      const z = data.map(p => p.z);
+        const trace = {
+          x: x,
+          y: y,
+          z: z,
+          mode: 'markers',
+          type: 'scatter3d',
+          marker: { size: 4, color: 'red' }
+        };
 
-      const trace = {
-        x: x,
-        y: y,
-        z: z,
-        mode: 'markers',
-        type: 'scatter3d',
-        marker: {
-          size: 3,
-          color: z, // Color by Z-axis
-          colorscale: 'Viridis',
-          opacity: 0.8
-        }
-      };
-
-      const layout = {
-        title: 'Volumetric 3D Plot',
-        scene: {
-          xaxis: { title: 'X' },
-          yaxis: { title: 'Y' },
-          zaxis: { title: 'Z' }
-        }
-      };
-
-      Plotly.newPlot('plotDiv', [trace], layout);
-    })
-    .catch(err => {
-      console.error('Error loading volumetric data:', err);
-      alert('Could not load volumetric data.');
-    });
-</script>
-
+        Plotly.newPlot('plot', [trace], { margin: { t:0 } });
+      })
+      .catch(err => console.error('Error loading JSON:', err));
+  </script>
 </body>
 </html>
