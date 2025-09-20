@@ -16,8 +16,8 @@
 
     camera.position.z = 20;
 
-    // Load volumetric data
-    fetch('data/volumetric_data.json')
+    // Load volumetric data (updated path)
+    fetch('volumetric_data.json')
       .then(response => response.json())
       .then(data => {
         data.forEach(point => {
