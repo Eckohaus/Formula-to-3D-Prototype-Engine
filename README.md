@@ -1,8 +1,5 @@
-
-# Volumetric-display
-Prototype engine to convert physics formulas into volumetric 3D outputs.
-
 # Formula-to-3D Prototype Engine
+Prototype engine to convert physics formulas into volumetric 3D outputs.
 
 **Description:**  
 Prototype engine to convert physics formulas (e.g., E = mc2) into interactive volumetric 3D outputs, deployable via cloud APIs.
@@ -20,11 +17,14 @@ Prototype engine to convert physics formulas (e.g., E = mc2) into interactive vo
 ## Getting Started
 1. Clone the repository to your cloud IDE (e.g., Replit, Render.com)
 2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt   # if using Python
-4. Access the API endpoints.
-   /get_volumetric
-5.	Open the visualization in a browser to see interactive 3D volumetric output.
+    ```bash
+    pip install -r requirements.txt   # if using Python
+    ```
+3. Access the API endpoint:
+    ```
+    /get_volumetric
+    ```
+4. Open the visualization in a browser to see interactive 3D volumetric output
 
 ---
 
