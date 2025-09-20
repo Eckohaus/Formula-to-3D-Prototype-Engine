@@ -1,31 +1,37 @@
 name: Update Volumetric Data
 
+# Trigger: daily at 02:00 UTC and also allow manual dispatch
 on:
   schedule:
-    - cron: '0 * * * *'  # Runs every hour
-  workflow_dispatch:     # Can trigger manually
+    - cron: '0 2 * * *'  # every day at 02:00 UTC
+  workflow_dispatch:
 
 jobs:
   update-data:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
 
-      - name: Setup Python
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Fetch IERS data
-        run: python engine/fetch_iers_data.py
-
-      - name: Commit updated JSON
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          python -m pip install --upgrade pip
+          pip install pandas requests numpy scipy
+
+      - name: Run fetch_iers_data.py
+        run: |
+          python engine/fetch_iers_data.py
+
+      - name: Commit and push updated JSON
+        run: |
+          git config --local user.email "github-actions@github.com"
+          git config --local user.name "GitHub Actions"
           git add docs/volumetric_data.json
-          git commit -m "Update volumetric data"
-          git push
+          git commit -m "Update volumetric_data.json from IERS"
+          git push origin githubpages  || echo "No changes to commit"
