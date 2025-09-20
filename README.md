@@ -31,16 +31,17 @@ Prototype engine to convert physics formulas (e.g., E = mc2) into interactive vo
 ## Project Structure
 
 ```
-formula-to-3d-prototype/
-├── engine/                 # Computational engine scripts (Python, Java, etc.)
-│   └── compute.py          # Computes volumetric data
-├── api/                    # API endpoints
-│   └── main.py             # REST API using FastAPI or Flask
-├── visualization/          # Browser-based 3D visualization
-│   └── index.html          # Example WebGL/Three.js front-end
-├── requirements.txt        # Python dependencies
-├── README.md               # Project documentation
-└── LICENSE                 # License
+formula-to-3d-prototype/  
+├── engine/                 # Computational engine scripts (Python, Java, etc.)  
+│   └── compute.py          # Computes volumetric data  
+├── api/                    # API endpoints  
+│   └── main.py             # REST API using FastAPI or Flask  
+├── docs/                   # GitHub Pages site (serves static files)  
+│   ├── index.html          # Example WebGL/Three.js front-end  
+│   └── volumetric_data.json # Placeholder volumetric data  
+├── requirements.txt        # Python dependencies  
+├── README.md               # Project documentation  
+└── LICENSE                 # License  
 ```
 
 ## Future Extensions
