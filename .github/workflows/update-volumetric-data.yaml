@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: gh-pages
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
           path: gh-pages
 
       # Step 3: Set up Python
@@ -54,5 +54,5 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "Update volumetric_data.json from IERS"
-            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Eckohaus/Formula-to-3D-Prototype-Engine.git gh-pages
+            git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/Eckohaus/Formula-to-3D-Prototype-Engine.git gh-pages
           fi
