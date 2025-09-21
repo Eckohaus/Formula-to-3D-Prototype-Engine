@@ -1,17 +1,17 @@
+import sys
+import os
 import pandas as pd
 import requests
 import json
 from io import StringIO
-import sys
-import os
 
-# Ensure engine folder is in path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'engine'))
-import compute  # compute.py defines generate_formula_data()
+# Add the engine folder to sys.path so we can import compute.py
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+import compute  # now this will work both locally and in GitHub Actions
 
 # URLs and paths
 CSV_URL = "https://datacenter.iers.org/data/csv/bulletina.longtime.csv"
-JSON_OUTPUT = "docs/volumetric_data.json"
+JSON_OUTPUT = os.path.join(os.path.dirname(__file__), "../docs/volumetric_data.json")
 
 def fetch_and_parse_csv(url):
     """Download CSV and parse semicolon-delimited content."""
