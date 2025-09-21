@@ -80,7 +80,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output",
         type=str,
-        default="../gh-pages/docs/volumetric_data.json",
+        default="gh-pages/docs/volumetric_data.json",
         help="Path to output JSON file"
     )
     parser.add_argument(
