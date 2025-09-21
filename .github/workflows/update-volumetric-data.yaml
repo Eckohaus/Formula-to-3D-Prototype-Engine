@@ -3,7 +3,7 @@ name: Update Volumetric Data
 on:
   schedule:
     - cron: '0 2 * * *'  # daily at 02:00 UTC
-  workflow_dispatch:       # allows manual trigger
+  workflow_dispatch:      # allows manual trigger
 
 jobs:
   update-data:
