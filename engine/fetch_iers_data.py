@@ -39,10 +39,18 @@ def extract_3d_points(df):
     ]
     return points
 
-def main(output_path):
+def main(output_path, debug=False):
     # Step 1: Fetch and parse CSV
     df = fetch_and_parse_csv(CSV_URL)
 
+    # --- Diagnostic snippet ---
+    if debug:
+        print("=== CSV Preview ===")
+        print(df.head())
+        print("\n=== Columns found in CSV ===")
+        print(list(df.columns))
+        print("===================")
+    
     # Step 2: Extract 3D points
     iers_points = extract_3d_points(df)
 
@@ -69,12 +77,16 @@ def main(output_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Fetch IERS data and output volumetric JSON.")
-    # Default path points to gh-pages/docs
     parser.add_argument(
         "--output",
         type=str,
         default="../gh-pages/docs/volumetric_data.json",
         help="Path to output JSON file"
     )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Enable diagnostic printout of CSV"
+    )
     args = parser.parse_args()
-    main(args.output)
+    main(args.output, debug=args.debug)
