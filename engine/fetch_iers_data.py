@@ -9,7 +9,6 @@ import os
 # URL of the IERS CSV
 CSV_URL = "https://datacenter.iers.org/data/csv/bulletina.longtime.csv"
 
-
 def fetch_and_parse_csv(url):
     """Download CSV and parse semicolon-delimited content."""
     try:
@@ -26,24 +25,26 @@ def fetch_and_parse_csv(url):
         print(f"Error parsing CSV: {e}")
         return pd.DataFrame()
 
-
 def extract_3d_points(df):
-    """Extract only dX, dY, UT1-UTC columns for volumetric display."""
-    required_cols = ["dX", "dY", "UT1-UTC"]
+    """Extract x_pole, y_pole, Year for volumetric display."""
+    required_cols = ["x_pole", "y_pole", "Year"]
     missing_cols = [col for col in required_cols if col not in df.columns]
     if missing_cols:
         print(f"Warning: Missing expected columns in CSV: {missing_cols}")
         return []
 
     points = [
-        {"x": row["dX"], "y": row["dY"], "z": row["UT1-UTC"]}
+        {"x": row["x_pole"], "y": row["y_pole"], "z": row["Year"]}
         for _, row in df.iterrows()
-        if not pd.isnull(row["dX"]) and not pd.isnull(row["dY"]) and not pd.isnull(row["UT1-UTC"])
+        if not pd.isnull(row["x_pole"]) and not pd.isnull(row["y_pole"]) and not pd.isnull(row["Year"])
     ]
     return points
 
-
 def main(output_path):
+    # Ensure output directory exists
+    output_dir = os.path.dirname(output_path)
+    os.makedirs(output_dir, exist_ok=True)
+
     # Step 1: Fetch and parse CSV
     df = fetch_and_parse_csv(CSV_URL)
 
@@ -63,24 +64,16 @@ def main(output_path):
         "formula": formula_points
     }
 
-    # Step 5: Save JSON directly to gh-pages folder
+    # Step 5: Save JSON
     try:
-        output_dir = os.path.dirname(output_path)
-        os.makedirs(output_dir, exist_ok=True)
-
         with open(output_path, "w") as f:
             json.dump(volumetric_data, f, indent=2)
-
-        print(
-            f"volumetric_data.json updated: {len(iers_points)} IERS points, {len(formula_points)} formula points."
-        )
+        print(f"volumetric_data.json updated: {len(iers_points)} IERS points, {len(formula_points)} formula points.")
     except Exception as e:
         print(f"Error writing JSON file: {e}")
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Fetch IERS data and output volumetric JSON.")
-    # Default path points to gh-pages/docs
     parser.add_argument(
         "--output",
         type=str,
