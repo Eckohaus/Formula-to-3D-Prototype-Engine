@@ -2,7 +2,7 @@ import pandas as pd
 import requests
 import json
 from io import StringIO
-from engine import compute  # assumes compute.py defines a function generate_formula_data()
+from . import compute  # assumes compute.py defines a function generate_formula_data()
 
 # URLs and paths
 CSV_URL = "https://datacenter.iers.org/data/csv/bulletina.longtime.csv"
