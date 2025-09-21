@@ -1,1 +1,56 @@
+name: Update Volumetric Data
 
+on:
+  schedule:
+    - cron: '0 2 * * *'  # every day at 02:00 UTC
+  workflow_dispatch:
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the main branch (code lives here)
+      - name: Checkout main branch
+        uses: actions/checkout@v3
+        with:
+          ref: main
+
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas requests numpy scipy
+
+      # Step 4: Run the fetch_iers_data.py script
+      - name: Run fetch_iers_data.py
+        run: python engine/fetch_iers_data.py
+
+      # Step 5: Checkout gh-pages branch to commit updated JSON
+      - name: Checkout gh-pages branch
+        run: |
+          git fetch origin gh-pages:gh-pages
+          git checkout gh-pages
+
+      # Step 6: Copy updated JSON from main to gh-pages branch (if not already in root)
+      - name: Copy JSON to gh-pages
+        run: |
+          cp docs/volumetric_data.json ./docs/volumetric_data.json
+
+      # Step 7: Commit and push if JSON changed
+      - name: Commit and push updated JSON
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+          git add docs/volumetric_data.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update volumetric_data.json from IERS"
+            git push origin gh-pages
