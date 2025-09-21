@@ -4,9 +4,11 @@ import json
 from io import StringIO
 import argparse
 import compute  # assumes compute.py defines a function generate_formula_data()
+import os
 
 # URL of the IERS CSV
 CSV_URL = "https://datacenter.iers.org/data/csv/bulletina.longtime.csv"
+
 
 def fetch_and_parse_csv(url):
     """Download CSV and parse semicolon-delimited content."""
@@ -24,6 +26,7 @@ def fetch_and_parse_csv(url):
         print(f"Error parsing CSV: {e}")
         return pd.DataFrame()
 
+
 def extract_3d_points(df):
     """Extract only dX, dY, UT1-UTC columns for volumetric display."""
     required_cols = ["dX", "dY", "UT1-UTC"]
@@ -39,18 +42,11 @@ def extract_3d_points(df):
     ]
     return points
 
-def main(output_path, debug=True):
+
+def main(output_path):
     # Step 1: Fetch and parse CSV
     df = fetch_and_parse_csv(CSV_URL)
 
-    # --- Diagnostic snippet ---
-    if debug:
-        print("=== CSV Preview ===")
-        print(df.head())
-        print("\n=== Columns found in CSV ===")
-        print(list(df.columns))
-        print("===================")
-    
     # Step 2: Extract 3D points
     iers_points = extract_3d_points(df)
 
@@ -69,24 +65,27 @@ def main(output_path, debug=True):
 
     # Step 5: Save JSON directly to gh-pages folder
     try:
+        output_dir = os.path.dirname(output_path)
+        os.makedirs(output_dir, exist_ok=True)
+
         with open(output_path, "w") as f:
             json.dump(volumetric_data, f, indent=2)
-        print(f"volumetric_data.json updated: {len(iers_points)} IERS points, {len(formula_points)} formula points.")
+
+        print(
+            f"volumetric_data.json updated: {len(iers_points)} IERS points, {len(formula_points)} formula points."
+        )
     except Exception as e:
         print(f"Error writing JSON file: {e}")
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Fetch IERS data and output volumetric JSON.")
+    # Default path points to gh-pages/docs
     parser.add_argument(
         "--output",
         type=str,
         default="gh-pages/docs/volumetric_data.json",
         help="Path to output JSON file"
     )
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Enable diagnostic printout of CSV"
-    )
     args = parser.parse_args()
-    main(args.output, debug=args.debug)
+    main(args.output)
