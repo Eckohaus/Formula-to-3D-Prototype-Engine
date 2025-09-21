@@ -1,61 +1,71 @@
-import requests
 import pandas as pd
+import requests
 import json
 from io import StringIO
-from engine import compute  # assumes compute.py defines a function to generate formula data
+from engine import compute  # assumes compute.py defines a function generate_formula_data()
 
-# URL of IERS CSV
+# URLs and paths
 CSV_URL = "https://datacenter.iers.org/data/csv/bulletina.longtime.csv"
+JSON_OUTPUT = "docs/volumetric_data.json"
 
-# --- Fetch IERS CSV ---
-try:
-    response = requests.get(CSV_URL)
-    response.raise_for_status()
-except requests.RequestException as e:
-    print(f"Error downloading CSV: {e}")
-    exit(1)
+def fetch_and_parse_csv(url):
+    """Download CSV and parse semicolon-delimited content."""
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        print(f"Error downloading CSV: {e}")
+        return pd.DataFrame()  # empty DataFrame on failure
 
-# --- Parse CSV ---
-try:
-    csv_text = response.text
-    df = pd.read_csv(StringIO(csv_text), sep=";")
-except Exception as e:
-    print(f"Error parsing CSV: {e}")
-    exit(1)
+    try:
+        df = pd.read_csv(StringIO(response.text), sep=';', engine='python')
+        return df
+    except pd.errors.ParserError as e:
+        print(f"Error parsing CSV: {e}")
+        return pd.DataFrame()
 
-# --- Filter the columns for volumetric display ---
-required_columns = ["dX", "dY", "UT1-UTC"]
-for col in required_columns:
-    if col not in df.columns:
-        print(f"Column '{col}' not found in CSV!")
-        exit(1)
+def extract_3d_points(df):
+    """Extract only dX, dY, UT1-UTC columns for volumetric display."""
+    required_cols = ["dX", "dY", "UT1-UTC"]
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        print(f"Warning: Missing expected columns in CSV: {missing_cols}")
+        return []
 
-iers_data = [
-    {"x": row["dX"], "y": row["dY"], "z": row["UT1-UTC"]}
-    for _, row in df.iterrows()
-]
+    points = [
+        {"x": row["dX"], "y": row["dY"], "z": row["UT1-UTC"]}
+        for _, row in df.iterrows()
+        if not pd.isnull(row["dX"]) and not pd.isnull(row["dY"]) and not pd.isnull(row["UT1-UTC"])
+    ]
+    return points
 
-# --- Compute formula data ---
-# Make sure compute.py has a function like `generate_formula_data()`
-# that returns a list of dicts: [{"x": ..., "y": ..., "z": ...}, ...]
-try:
-    formula_data = compute.generate_formula_data()
-except Exception as e:
-    print(f"Error computing formula data: {e}")
-    formula_data = []
+def main():
+    # Step 1: Fetch and parse CSV
+    df = fetch_and_parse_csv(CSV_URL)
 
-# --- Combine into JSON structure ---
-volumetric_json = {
-    "iers": iers_data,
-    "formula": formula_data
-}
+    # Step 2: Extract 3D points
+    iers_points = extract_3d_points(df)
 
-# --- Write JSON to docs folder ---
-json_file_path = "docs/volumetric_data.json"
-try:
-    with open(json_file_path, "w") as f:
-        json.dump(volumetric_json, f, indent=2)
-    print(f"Volumetric JSON updated successfully at '{json_file_path}'!")
-except Exception as e:
-    print(f"Error writing JSON: {e}")
-    exit(1)
+    # Step 3: Generate formula points using compute.py
+    try:
+        formula_points = compute.generate_formula_data()
+    except Exception as e:
+        print(f"Error generating formula points: {e}")
+        formula_points = []
+
+    # Step 4: Combine into JSON
+    volumetric_data = {
+        "iers": iers_points,
+        "formula": formula_points
+    }
+
+    # Step 5: Save JSON to docs folder
+    try:
+        with open(JSON_OUTPUT, "w") as f:
+            json.dump(volumetric_data, f, indent=2)
+        print(f"volumetric_data.json updated: {len(iers_points)} IERS points, {len(formula_points)} formula points.")
+    except Exception as e:
+        print(f"Error writing JSON file: {e}")
+
+if __name__ == "__main__":
+    main()
