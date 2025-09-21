@@ -26,7 +26,7 @@ def fetch_and_parse_csv(url):
         return pd.DataFrame()
 
 def extract_3d_points(df):
-    """Extract x_pole, y_pole, Year for volumetric display."""
+    """Extract only x_pole, y_pole, and year columns for volumetric display."""
     required_cols = ["x_pole", "y_pole", "Year"]
     missing_cols = [col for col in required_cols if col not in df.columns]
     if missing_cols:
