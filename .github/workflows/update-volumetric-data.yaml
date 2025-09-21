@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout main branch (where fetch_iers_data.py lives)
+      # Step 1: Checkout main branch
       - name: Checkout main branch
         uses: actions/checkout@v3
         with:
@@ -30,9 +30,10 @@ jobs:
           pip install pandas requests numpy
 
       # Step 4: Run fetch_iers_data.py
-      - name: Run fetch_iers_data.py
+      - name: Generate temp JSON
         working-directory: main/engine
-        run: python fetch_iers_data.py --output "../../temp_volumetric_data.json"
+        run: |
+          python fetch_iers_data.py --output "../../temp_volumetric_data.json"
 
       # Step 5: Checkout gh-pages branch
       - name: Checkout gh-pages branch
@@ -45,7 +46,7 @@ jobs:
       - name: Move JSON to gh-pages/docs
         run: |
           mkdir -p gh-pages/docs
-          mv temp_volumetric_data.json gh-pages/docs/volumetric_data.json
+          mv ../temp_volumetric_data.json gh-pages/docs/volumetric_data.json
 
       # Step 7: Commit & push changes
       - name: Commit & push changes
