@@ -42,14 +42,7 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
-      # Step 6: Move JSON into gh-pages/docs
-      - name: Move JSON to gh-pages/docs
-        run: |
-          mkdir -p docs
-          mv ../../temp_volumetric_data.json docs/volumetric_data.json
-        working-directory: gh-pages
-
-      # Step 7: Commit & push changes
+      # Step 6: Commit & push changes
       - name: Commit & push changes
         working-directory: gh-pages
         run: |
