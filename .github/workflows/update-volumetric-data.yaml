@@ -29,11 +29,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas requests numpy
 
-      # Step 4: Run fetch_iers_data.py and output JSON to a temp file
+      # Step 4: Run fetch_iers_data.py and output JSON directly to gh-pages/docs
       - name: Run fetch_iers_data.py
         working-directory: main/engine
         run: |
-          python fetch_iers_data.py --output "../../temp_volumetric_data.json"
+          python fetch_iers_data.py --output "../../gh-pages/docs/volumetric_data.json"
 
       # Step 5: Checkout gh-pages branch
       - name: Checkout gh-pages branch
@@ -42,13 +42,7 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
-      # Step 6: Move JSON into gh-pages/docs
-      - name: Move JSON to gh-pages/docs
-        run: |
-          mkdir -p gh-pages/docs
-          mv ../../temp_volumetric_data.json gh-pages/docs/volumetric_data.json
-
-      # Step 7: Commit & push changes
+      # Step 6: Commit & push changes
       - name: Commit & push changes
         working-directory: gh-pages
         run: |
