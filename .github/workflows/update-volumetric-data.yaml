@@ -15,7 +15,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: main
-          path: main
 
       # Step 2: Set up Python
       - name: Set up Python
@@ -29,27 +28,24 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas requests numpy scipy
 
-      # Step 4: Run fetch_iers_data.py to generate JSON
-      - name: Generate volumetric JSON
-        working-directory: main/engine
-        run: python fetch_iers_data.py
+      # Step 4: Run fetch_iers_data.py and output JSON into a temporary folder
+      - name: Run fetch_iers_data.py
+        run: |
+          python engine/fetch_iers_data.py --output temp_volumetric_data.json
 
-      # Step 5: Debug: List files in main/docs
-      - name: List main/docs contents
-        run: ls -l main/docs
-
-      # Step 6: Checkout gh-pages branch into subfolder
+      # Step 5: Checkout gh-pages branch to a separate path
       - name: Checkout gh-pages branch
         uses: actions/checkout@v3
         with:
           ref: gh-pages
           path: gh-pages
 
-      # Step 7: Copy the generated JSON to gh-pages/docs
-      - name: Copy volumetric_data.json
-        run: cp main/docs/volumetric_data.json gh-pages/docs/volumetric_data.json
+      # Step 6: Move generated JSON into gh-pages/docs
+      - name: Move JSON to gh-pages/docs
+        run: |
+          mv temp_volumetric_data.json gh-pages/docs/volumetric_data.json
 
-      # Step 8: Commit and push changes if JSON updated
+      # Step 7: Commit & push changes if JSON changed
       - name: Commit & push changes
         working-directory: gh-pages
         run: |
