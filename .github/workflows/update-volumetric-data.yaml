@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main branch
+      - name: Checkout gh-pages branch
         uses: actions/checkout@v3
         with:
-          ref: main
+          ref: gh-pages
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -26,22 +26,17 @@ jobs:
           pip install pandas requests numpy scipy
 
       - name: Run fetch_iers_data.py
-        run: python engine/fetch_iers_data.py
+        run: |
+          python ../engine/fetch_iers_data.py
 
-      - name: Check for changes in volumetric_data.json
-        id: git-check
+      - name: Commit and push if JSON changed
         run: |
           git config --local user.email "github-actions@github.com"
           git config --local user.name "GitHub Actions"
           git add docs/volumetric_data.json
-          if git diff --cached --quiet; then
-            echo "no_changes=true" >> $GITHUB_ENV
+          if ! git diff --cached --quiet; then
+            git commit -m "Update volumetric_data.json from IERS"
+            git push origin gh-pages
           else
-            echo "no_changes=false" >> $GITHUB_ENV
+            echo "No changes to commit."
           fi
-
-      - name: Commit and push if JSON changed
-        if: env.no_changes == 'false'
-        run: |
-          git commit -m "Update volumetric_data.json from IERS"
-          git push origin main
