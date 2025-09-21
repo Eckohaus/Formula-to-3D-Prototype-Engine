@@ -1,17 +1,12 @@
-import sys
-import os
 import pandas as pd
 import requests
 import json
 from io import StringIO
+import argparse
+import compute  # assumes compute.py defines a function generate_formula_data()
 
-# Add the engine folder to sys.path so we can import compute.py
-sys.path.append(os.path.join(os.path.dirname(__file__)))
-import compute  # now this will work both locally and in GitHub Actions
-
-# URLs and paths
+# URL of the IERS CSV
 CSV_URL = "https://datacenter.iers.org/data/csv/bulletina.longtime.csv"
-JSON_OUTPUT = os.path.join(os.path.dirname(__file__), "../docs/volumetric_data.json")
 
 def fetch_and_parse_csv(url):
     """Download CSV and parse semicolon-delimited content."""
@@ -20,7 +15,7 @@ def fetch_and_parse_csv(url):
         response.raise_for_status()
     except requests.RequestException as e:
         print(f"Error downloading CSV: {e}")
-        return pd.DataFrame()  # empty DataFrame on failure
+        return pd.DataFrame()
 
     try:
         df = pd.read_csv(StringIO(response.text), sep=';', engine='python')
@@ -44,7 +39,7 @@ def extract_3d_points(df):
     ]
     return points
 
-def main():
+def main(output_path):
     # Step 1: Fetch and parse CSV
     df = fetch_and_parse_csv(CSV_URL)
 
@@ -64,13 +59,22 @@ def main():
         "formula": formula_points
     }
 
-    # Step 5: Save JSON to docs folder
+    # Step 5: Save JSON
     try:
-        with open(JSON_OUTPUT, "w") as f:
+        with open(output_path, "w") as f:
             json.dump(volumetric_data, f, indent=2)
         print(f"volumetric_data.json updated: {len(iers_points)} IERS points, {len(formula_points)} formula points.")
     except Exception as e:
         print(f"Error writing JSON file: {e}")
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Fetch IERS data and output volumetric JSON.")
+    # Update default path to gh-pages/docs
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="../gh-pages/docs/volumetric_data.json",
+        help="Path to output JSON file"
+    )
+    args = parser.parse_args()
+    main(args.output)
