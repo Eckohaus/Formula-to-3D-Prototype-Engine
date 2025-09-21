@@ -60,3 +60,4 @@ jobs:
           else
             git commit -m "Update volumetric_data.json from IERS"
             git push origin gh-pages
+          fi
