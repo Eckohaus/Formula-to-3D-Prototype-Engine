@@ -24,8 +24,7 @@ jobs:
           pip install pandas requests numpy scipy
 
       - name: Run fetch_iers_data.py
-        run: |
-          python engine/fetch_iers_data.py
+        run: python -m engine.fetch_iers_data
 
       - name: Check for changes in volumetric_data.json
         id: git-check
