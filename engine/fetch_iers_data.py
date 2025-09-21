@@ -2,7 +2,12 @@ import pandas as pd
 import requests
 import json
 from io import StringIO
-import compute  # assumes compute.py is in the same folder (engine/)
+import sys
+import os
+
+# Ensure engine folder is in path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'engine'))
+import compute  # compute.py defines generate_formula_data()
 
 # URLs and paths
 CSV_URL = "https://datacenter.iers.org/data/csv/bulletina.longtime.csv"
