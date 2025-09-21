@@ -26,7 +26,7 @@ def fetch_and_parse_csv(url):
         return pd.DataFrame()
 
 def extract_3d_points(df):
-    """Extract only x_pole, y_pole, and year columns for volumetric display."""
+    """Extract only x_pole, y_pole, and Year columns for volumetric display."""
     required_cols = ["x_pole", "y_pole", "Year"]
     missing_cols = [col for col in required_cols if col not in df.columns]
     if missing_cols:
@@ -68,7 +68,14 @@ def main(output_path):
     try:
         with open(output_path, "w") as f:
             json.dump(volumetric_data, f, indent=2)
-        print(f"volumetric_data.json updated: {len(iers_points)} IERS points, {len(formula_points)} formula points.")
+
+        print(f"volumetric_data.json updated: {len(volumetric_data['iers'])} IERS points, {len(volumetric_data['formula'])} formula points.")
+
+        # --- Debug snippet ---
+        print(f"JSON file written to {output_path}")
+        print(json.dumps(volumetric_data, indent=2)[:1000])  # prints first 1000 characters
+        # ---------------------
+
     except Exception as e:
         print(f"Error writing JSON file: {e}")
 
