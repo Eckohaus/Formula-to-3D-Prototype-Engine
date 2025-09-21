@@ -39,7 +39,7 @@ def extract_3d_points(df):
     ]
     return points
 
-def main(output_path, debug=False):
+def main(output_path, debug=True):
     # Step 1: Fetch and parse CSV
     df = fetch_and_parse_csv(CSV_URL)
 
