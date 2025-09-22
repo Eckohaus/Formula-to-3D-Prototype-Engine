@@ -1,3 +1,5 @@
+# Deprecated – replaced by update-volumetric-data.yaml.
+
 name: Fetch IERS Bulletin A Data
 
 on:
