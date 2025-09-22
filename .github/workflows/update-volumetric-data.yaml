@@ -1,68 +1,59 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Volumetric Display</title>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  <style>
-    body { margin: 0; display: block; }
-    #iersPlot, #formulaPlot { width: 100vw; height: 50vh; }
-  </style>
-</head>
-<body>
-  <div id="iersPlot"></div>
-  <div id="formulaPlot"></div>
+# This workflow updates volumetric_data.json daily; replaces fetch_iers.yml
+name: Update Volumetric Data
 
-  <script>
-    // Fetch volumetric JSON
-    fetch('volumetric_data.json?v=' + new Date().getTime())
-      .then(response => response.json())
-      .then(data => {
-        const iersData = data.iers || [{"x":0,"y":0,"z":0}];
-        const formulaData = data.formula || [{"x":0,"y":0,"z":0}];
+on:
+  schedule:
+    - cron: '0 2 * * *'  # daily at 02:00 UTC
+  workflow_dispatch:       # allows manual trigger
 
-        function mapXYZ(arr) {
-          return {
-            x: arr.map(p => p.x),
-            y: arr.map(p => p.y),
-            z: arr.map(p => p.z)
-          };
-        }
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
 
-        // IERS plot
-        const iersXYZ = mapXYZ(iersData);
-        const iersTrace = {
-          x: iersXYZ.x,
-          y: iersXYZ.y,
-          z: iersXYZ.z,
-          mode: 'markers',
-          type: 'scatter3d',
-          marker: { size: 3, color: iersXYZ.z, colorscale: 'Viridis', opacity: 0.8 }
-        };
-        const iersLayout = { 
-          margin: { l:0,r:0,b:0,t:0 }, 
-          scene:{ xaxis:{title:'x_pole'}, yaxis:{title:'y_pole'}, zaxis:{title:'Year'} } 
-        };
-        Plotly.newPlot('iersPlot', [iersTrace], iersLayout, {responsive: true});
+    steps:
+      # Step 1: Checkout main branch (script lives here)
+      - name: Checkout main branch
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          path: main
 
-        // Formula plot
-        const formulaXYZ = mapXYZ(formulaData);
-        const formulaTrace = {
-          x: formulaXYZ.x,
-          y: formulaXYZ.y,
-          z: formulaXYZ.z,
-          mode: 'markers',
-          type: 'scatter3d',
-          marker: { size: 3, color: formulaXYZ.z, colorscale: 'Plasma', opacity: 0.8 }
-        };
-        const formulaLayout = { 
-          margin: { l:0,r:0,b:0,t:0 }, 
-          scene:{ xaxis:{title:'x'}, yaxis:{title:'y'}, zaxis:{title:'z'} } 
-        };
-        Plotly.newPlot('formulaPlot', [formulaTrace], formulaLayout, {responsive: true});
+      # Step 2: Checkout gh-pages branch (output goes here)
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          token: ${{ secrets.PAT_TOKEN }}
+          path: gh-pages
 
-      })
-      .catch(err => console.error("Error loading volumetric JSON:", err));
-  </script>
-</body>
-</html>
+      # Step 3: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # Step 4: Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas requests numpy
+
+      # Step 5: Run fetch_iers_data.py and save into gh-pages/docs
+      - name: Run data fetch
+        working-directory: main/engine
+        run: |
+          python fetch_iers_data.py --output "../../gh-pages/docs/volumetric_data.json"
+
+      # Step 6: Commit & push changes
+      - name: Commit & push changes
+        working-directory: gh-pages
+        run: |
+          git config --local user.email "github-actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add docs/volumetric_data.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update volumetric_data.json from IERS"
+            git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/Eckohaus/Formula-to-3D-Prototype-Engine.git gh-pages
+          fi
