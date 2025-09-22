@@ -5,8 +5,8 @@
   <title>Volumetric Display</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    body { margin: 0; display: flex; }
-    #iersPlot, #formulaPlot { width: 50vw; height: 100vh; }
+    body { margin: 0; display: block; }
+    #iersPlot, #formulaPlot { width: 100vw; height: 50vh; }
   </style>
 </head>
 <body>
@@ -14,14 +14,13 @@
   <div id="formulaPlot"></div>
 
   <script>
-    // Fetch volumetric JSON with fallback
+    // Fetch volumetric JSON
     fetch('volumetric_data.json')
       .then(response => response.json())
       .then(data => {
         const iersData = data.iers || [{"x":0,"y":0,"z":0}];
         const formulaData = data.formula || [{"x":0,"y":0,"z":0}];
 
-        // Helper function to map x, y, z
         function mapXYZ(arr) {
           return {
             x: arr.map(p => p.x),
@@ -30,11 +29,8 @@
           };
         }
 
-        // Map IERS and formula data
-        const iersXYZ = mapXYZ(iersData);
-        const formulaXYZ = mapXYZ(formulaData);
-
         // IERS plot
+        const iersXYZ = mapXYZ(iersData);
         const iersTrace = {
           x: iersXYZ.x,
           y: iersXYZ.y,
@@ -45,15 +41,12 @@
         };
         const iersLayout = { 
           margin: { l:0,r:0,b:0,t:0 }, 
-          scene:{ 
-            xaxis:{title:'x_pole'}, 
-            yaxis:{title:'y_pole'}, 
-            zaxis:{title:'Year'} 
-          } 
+          scene:{ xaxis:{title:'x_pole'}, yaxis:{title:'y_pole'}, zaxis:{title:'Year'} } 
         };
         Plotly.newPlot('iersPlot', [iersTrace], iersLayout, {responsive: true});
 
         // Formula plot
+        const formulaXYZ = mapXYZ(formulaData);
         const formulaTrace = {
           x: formulaXYZ.x,
           y: formulaXYZ.y,
@@ -64,18 +57,12 @@
         };
         const formulaLayout = { 
           margin: { l:0,r:0,b:0,t:0 }, 
-          scene:{ 
-            xaxis:{title:'x'}, 
-            yaxis:{title:'y'}, 
-            zaxis:{title:'z'} 
-          } 
+          scene:{ xaxis:{title:'x'}, yaxis:{title:'y'}, zaxis:{title:'z'} } 
         };
         Plotly.newPlot('formulaPlot', [formulaTrace], formulaLayout, {responsive: true});
 
       })
-      .catch(err => {
-        console.error("Error loading volumetric JSON:", err);
-      });
+      .catch(err => console.error("Error loading volumetric JSON:", err));
   </script>
 </body>
 </html>
