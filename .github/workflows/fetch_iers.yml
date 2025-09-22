@@ -2,6 +2,8 @@ name: Fetch IERS Bulletin A Data
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * *"  # optional: run daily at 02:00 UTC
 
 jobs:
   fetch:
@@ -9,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
@@ -20,30 +22,16 @@ jobs:
 
       - name: Fetch and process IERS data
         run: |
-          python - <<EOF
-          import pandas as pd
-          import requests
-          import json
-
-          # Download the IERS Bulletin A data
-          url = "https://datacenter.iers.org/data/csv/bulletina.longtime.csv"
-          response = requests.get(url)
-          with open("bulletina.longtime.csv", "wb") as f:
-              f.write(response.content)
-
-          # Read the data into a pandas DataFrame
-          df = pd.read_csv("bulletina.longtime.csv", header=0, comment=";", skiprows=1)
-
-          # Select relevant columns and convert to JSON
-          points = df[["x", "y", "dX", "dY"]].to_dict(orient="records")
-          with open("docs/volumetric_data.json", "w") as f:
-              json.dump(points, f)
-          EOF
+          python engine/fetch_iers_data.py --output docs/volumetric_data.json
 
       - name: Commit updated JSON
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add docs/volumetric_data.json
-          git commit -m "Update volumetric data from IERS Bulletin A"
-          git push
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update volumetric data from IERS Bulletin A"
+            git push
+          fi
