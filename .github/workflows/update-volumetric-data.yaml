@@ -15,7 +15,7 @@
 
   <script>
     // Fetch volumetric JSON
-    fetch('volumetric_data.json')
+    fetch('volumetric_data.json?v=' + new Date().getTime())
       .then(response => response.json())
       .then(data => {
         const iersData = data.iers || [{"x":0,"y":0,"z":0}];
