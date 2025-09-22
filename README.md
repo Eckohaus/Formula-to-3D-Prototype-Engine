@@ -16,7 +16,7 @@ Prototype engine to convert physics formulas into volumetric 3D outputs.
 This project integrates external datasets for visualization:
 
 - **IERS Earth Orientation Parameters (EOP) data**
-Provided by the International Earth Rotation and Reference Systems Service (IERS).
+Provided by the [International Earth Rotation and Reference Systems Service (IERS)](https://www.iers.org/IERS/EN/DataProducts/EarthOrientationData/eop.html)
 The IERS is the authoritative source for Earth orientation parameters. This repository only fetches and reformats the data for visualization purposes.
 
 If you use or redistribute this project, please also credit the IERS as the original data provider.
