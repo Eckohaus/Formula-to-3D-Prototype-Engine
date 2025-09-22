@@ -1,20 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Volumetric Display</title>
+  <meta charset="UTF-8">
+  <title>Volumetric Display - IERS & Formula</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    body { margin: 0; display: block; }
-    #iersPlot, #formulaPlot { width: 100vw; height: 50vh; }
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 0; 
+      padding: 0; 
+      line-height: 1.5;
+    }
+    header {
+      background-color: #f0f0f0;
+      padding: 1rem;
+      text-align: center;
+    }
+    main {
+      display: flex;
+      flex-direction: column; /* stacked for mobile and desktop */
+      align-items: center;
+      padding: 1rem;
+    }
+    .plot-container {
+      width: 90%;
+      max-width: 800px;
+      height: 400px;
+      margin-bottom: 2rem;
+    }
+    .description {
+      width: 90%;
+      max-width: 800px;
+      font-size: 0.9rem;
+      color: #333;
+      margin-bottom: 2rem;
+    }
+    a {
+      color: #0074D9;
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
-  <div id="iersPlot"></div>
-  <div id="formulaPlot"></div>
+
+  <header>
+    <h1>Volumetric Display: IERS Data & Formula</h1>
+  </header>
+
+  <main>
+    <section class="plot-container" id="iersPlot"></section>
+    <div class="description">
+      <strong>IERS Data:</strong> Interactive 3D plot of Earth Orientation Parameters (x_pole, y_pole, Year).<br>
+      Source: <a href="https://www.iers.org" target="_blank">International Earth Rotation and Reference Systems Service (IERS)</a><br>
+      Note: The "Bulletin A" dataset is used for illustrative purposes.
+    </div>
+
+    <section class="plot-container" id="formulaPlot"></section>
+    <div class="description">
+      <strong>Formula Data:</strong> Interactive 3D plot of your physics formula volumetric data from <code>compute.py</code>.<br>
+      Labels: x, y, z
+    </div>
+  </main>
 
   <script>
-    // Fetch volumetric JSON
     fetch('volumetric_data.json')
       .then(response => response.json())
       .then(data => {
@@ -29,40 +77,30 @@
           };
         }
 
-        // IERS plot
+        // IERS Plot
         const iersXYZ = mapXYZ(iersData);
-        const iersTrace = {
+        Plotly.newPlot('iersPlot', [{
           x: iersXYZ.x,
           y: iersXYZ.y,
           z: iersXYZ.z,
           mode: 'markers',
           type: 'scatter3d',
           marker: { size: 3, color: iersXYZ.z, colorscale: 'Viridis', opacity: 0.8 }
-        };
-        const iersLayout = { 
-          margin: { l:0,r:0,b:0,t:0 }, 
-          scene:{ xaxis:{title:'x_pole'}, yaxis:{title:'y_pole'}, zaxis:{title:'Year'} } 
-        };
-        Plotly.newPlot('iersPlot', [iersTrace], iersLayout, {responsive: true});
+        }], { margin:{l:0,r:0,b:0,t:0}, scene:{ xaxis:{title:'x_pole'}, yaxis:{title:'y_pole'}, zaxis:{title:'Year'} } });
 
-        // Formula plot
+        // Formula Plot
         const formulaXYZ = mapXYZ(formulaData);
-        const formulaTrace = {
+        Plotly.newPlot('formulaPlot', [{
           x: formulaXYZ.x,
           y: formulaXYZ.y,
           z: formulaXYZ.z,
           mode: 'markers',
           type: 'scatter3d',
           marker: { size: 3, color: formulaXYZ.z, colorscale: 'Plasma', opacity: 0.8 }
-        };
-        const formulaLayout = { 
-          margin: { l:0,r:0,b:0,t:0 }, 
-          scene:{ xaxis:{title:'x'}, yaxis:{title:'y'}, zaxis:{title:'z'} } 
-        };
-        Plotly.newPlot('formulaPlot', [formulaTrace], formulaLayout, {responsive: true});
-
+        }], { margin:{l:0,r:0,b:0,t:0}, scene:{ xaxis:{title:'x'}, yaxis:{title:'y'}, zaxis:{title:'z'} } });
       })
       .catch(err => console.error("Error loading volumetric JSON:", err));
   </script>
+
 </body>
 </html>
