@@ -5,46 +5,47 @@
   <title>Formula-to-3D Prototype Engine</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      margin: 0; 
-      padding: 0; 
-      line-height: 1.5;
-      background-color: #f9f9f9;
-    }
-    header {
-      background-color: #0074D9;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-    }
-    main {
-      display: flex;
-      flex-direction: column; /* stacked for mobile and desktop */
-      align-items: center;
-      padding: 1rem;
-    }
-    section.plot-section {
-      width: 90%;
-      max-width: 900px;
-      margin-bottom: 2rem;
-    }
-    .plot-container {
-      width: 100%;
-      height: 400px;
-      background-color: white;
-      border: 1px solid #ccc;
-    }
-    .description {
-      margin-top: 0.5rem;
-      font-size: 0.95rem;
-      color: #333;
-    }
-    a {
-      color: #0074D9;
-      text-decoration: none;
-    }
-  </style>
+  body { 
+    font-family: Arial, sans-serif; 
+    margin: 0; 
+    padding: 0; 
+    line-height: 1.5;
+    background-color: #f9f9f9;
+  }
+  header {
+    background-color: #0074D9;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+  }
+  main {
+    display: flex;
+    flex-direction: column; /* stacked for mobile and desktop */
+    align-items: center;
+    padding: 1rem;
+  }
+  section.plot-section {
+    width: 90%;
+    max-width: 900px;
+    margin-bottom: 2rem;
+  }
+  .plot-container {
+    width: 100%;
+    height: 50vh; /* dynamic height: 50% of viewport height */
+    min-height: 300px; /* ensures reasonable height on small screens */
+    background-color: white;
+    border: 1px solid #ccc;
+  }
+  .description {
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    color: #333;
+  }
+  a {
+    color: #0074D9;
+    text-decoration: none;
+  }
+ </style>
 </head>
 <body>
   <header>
