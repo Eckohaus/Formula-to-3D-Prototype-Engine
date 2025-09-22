@@ -30,8 +30,11 @@
           };
         }
 
-        // IERS plot
+        // Map IERS and formula data
         const iersXYZ = mapXYZ(iersData);
+        const formulaXYZ = mapXYZ(formulaData);
+
+        // IERS plot
         const iersTrace = {
           x: iersXYZ.x,
           y: iersXYZ.y,
@@ -40,11 +43,17 @@
           type: 'scatter3d',
           marker: { size: 3, color: iersXYZ.z, colorscale: 'Viridis', opacity: 0.8 }
         };
-        const iersLayout = { margin: { l:0,r:0,b:0,t:0 }, scene:{ xaxis:{title:'dX'}, yaxis:{title:'dY'}, zaxis:{title:'UT1-UTC'} } };
+        const iersLayout = { 
+          margin: { l:0,r:0,b:0,t:0 }, 
+          scene:{ 
+            xaxis:{title:'x_pole'}, 
+            yaxis:{title:'y_pole'}, 
+            zaxis:{title:'Year'} 
+          } 
+        };
         Plotly.newPlot('iersPlot', [iersTrace], iersLayout, {responsive: true});
 
         // Formula plot
-        const formulaXYZ = mapXYZ(formulaData);
         const formulaTrace = {
           x: formulaXYZ.x,
           y: formulaXYZ.y,
@@ -53,7 +62,14 @@
           type: 'scatter3d',
           marker: { size: 3, color: formulaXYZ.z, colorscale: 'Plasma', opacity: 0.8 }
         };
-        const formulaLayout = { margin: { l:0,r:0,b:0,t:0 }, scene:{ xaxis:{title:'X'}, yaxis:{title:'Y'}, zaxis:{title:'Z'} } };
+        const formulaLayout = { 
+          margin: { l:0,r:0,b:0,t:0 }, 
+          scene:{ 
+            xaxis:{title:'x'}, 
+            yaxis:{title:'y'}, 
+            zaxis:{title:'z'} 
+          } 
+        };
         Plotly.newPlot('formulaPlot', [formulaTrace], formulaLayout, {responsive: true});
 
       })
