@@ -1,3 +1,4 @@
+# This workflow updates volumetric_data.json daily; replaces fetch_iers.yml
 name: Update Volumetric Data
 
 on:
