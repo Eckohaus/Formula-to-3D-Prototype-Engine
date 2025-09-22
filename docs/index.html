@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Volumetric Display - IERS & Formula</title>
+  <title>Formula-to-3D Prototype Engine</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
     body { 
@@ -10,9 +10,11 @@
       margin: 0; 
       padding: 0; 
       line-height: 1.5;
+      background-color: #f9f9f9;
     }
     header {
-      background-color: #f0f0f0;
+      background-color: #0074D9;
+      color: white;
       padding: 1rem;
       text-align: center;
     }
@@ -22,18 +24,21 @@
       align-items: center;
       padding: 1rem;
     }
-    .plot-container {
+    section.plot-section {
       width: 90%;
-      max-width: 800px;
-      height: 400px;
+      max-width: 900px;
       margin-bottom: 2rem;
     }
+    .plot-container {
+      width: 100%;
+      height: 400px;
+      background-color: white;
+      border: 1px solid #ccc;
+    }
     .description {
-      width: 90%;
-      max-width: 800px;
-      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
       color: #333;
-      margin-bottom: 2rem;
     }
     a {
       color: #0074D9;
@@ -42,24 +47,29 @@
   </style>
 </head>
 <body>
-
   <header>
-    <h1>Volumetric Display: IERS Data & Formula</h1>
+    <h1>Formula-to-3D Prototype Engine</h1>
   </header>
 
   <main>
-    <section class="plot-container" id="iersPlot"></section>
-    <div class="description">
-      <strong>IERS Data:</strong> Interactive 3D plot of Earth Orientation Parameters (x_pole, y_pole, Year).<br>
-      Source: <a href="https://www.iers.org" target="_blank">International Earth Rotation and Reference Systems Service (IERS)</a><br>
-      Note: The "Bulletin A" dataset is used for illustrative purposes.
-    </div>
+    <!-- IERS Data Section -->
+    <section class="plot-section">
+      <div class="plot-container" id="iersPlot"></div>
+      <div class="description">
+        <strong>IERS Data:</strong> Interactive 3D plot of Earth Orientation Parameters (x_pole, y_pole, Year).<br>
+        Source: <a href="https://www.iers.org" target="_blank">International Earth Rotation and Reference Systems Service (IERS)</a><br>
+        Note: The "Bulletin A" dataset is used for illustrative purposes.
+      </div>
+    </section>
 
-    <section class="plot-container" id="formulaPlot"></section>
-    <div class="description">
-      <strong>Formula Data:</strong> Interactive 3D plot of physics formula volumetric data from <code>compute.py</code>.<br>
-      Labels: x, y, z
-    </div>
+    <!-- Formula Data Section -->
+    <section class="plot-section">
+      <div class="plot-container" id="formulaPlot"></div>
+      <div class="description">
+        <strong>Formula Data:</strong> Interactive 3D plot of physics formula, volumetric data from <code>compute.py</code>.<br>
+        <b>Labels:</b> x, y, z
+      </div>
+    </section>
   </main>
 
   <script>
@@ -101,6 +111,5 @@
       })
       .catch(err => console.error("Error loading volumetric JSON:", err));
   </script>
-
 </body>
 </html>
