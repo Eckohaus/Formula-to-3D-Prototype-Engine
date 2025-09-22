@@ -1,16 +1,25 @@
 # Formula-to-3D Prototype Engine
 Prototype engine to convert physics formulas into volumetric 3D outputs.
 
-**Description:**  
-Prototype engine to convert physics formulas (e.g., E = mc2) into interactive volumetric 3D outputs, deployable via cloud APIs.
+**Description:**  This project demonstrates how physics formulas (e.g., E = mc²) and external scientific datasets can be transformed into **interactive volumetric 3D visualizations**, deployable via cloud APIs and GitHub Pages.
 
 ---
 
 ## Features
 - Compute volumetric data from formulas on a 3D grid
+- Fetch and process scientific datasets (currently IERS Earth orientation parameters)
 - Simple REST API to trigger computation
 - Interactive 3D visualization using Plotly.js
 - Mobile-accessible and cloud-deployable
+
+## Data Sources & Attribution
+This project integrates external datasets for visualization:
+
+- **IERS Earth Orientation Parameters (EOP) data**
+Provided by the International Earth Rotation and Reference Systems Service (IERS).
+The IERS is the authoritative source for Earth orientation parameters. This repository only fetches and reformats the data for visualization purposes.
+
+If you use or redistribute this project, please also credit the IERS as the original data provider.
 
 ---
 
@@ -33,10 +42,10 @@ Prototype engine to convert physics formulas (e.g., E = mc2) into interactive vo
 ```
 formula-to-3d-prototype/
 ├── engine/
-│   ├── compute.py              # Original computational engine (placeholder formula)
-│   └── fetch_iers_data.py      # New script to pull, filter, and convert IERS data into JSON
+│   ├── compute.py              # Example formula computation (E = mc² placeholder)
+│   └── fetch_iers_data.py      # Script to pull, filter, and convert IERS data into JSON
 ├── api/                        # REST API endpoints (optional)
-├── docs/                       # GitHub Pages folder
+├── docs/                       # GitHub Pages deployment folder
 │   ├── index.html
 │   └── volumetric_data.json
 ├── requirements.txt
@@ -45,17 +54,21 @@ formula-to-3d-prototype/
 ```
 
 ## Current Status
-- Static frontend fully deployed via GitHub Pages at [https://toko.eckohaus.com](https://toko.eckohaus.com)
-- Volumetric display is rendering; formula placeholder in place
-- Scheduled GitHub Actions update the IERS data daily at 02:00 UTC
+- Static frontend deployed via GitHub Pages at https://toko.eckohaus.com
+- Volumetric displays:
+	•	**Left**: IERS dataset (auto-updated daily at 02:00 UTC via GitHub Actions)
+	•	**Right**: Formula placeholder array from compute.py
+- CI/CD pipeline fetches and pushes new data to gh-pages
 
 ## Future Extensions
-- Replace placeholder formula with more complex physics formulas (QCD, energy fields)
-- Integrate ML pipelines
+- Replace placeholder formula with more complex physics models (QCD, energy fields, etc.)
+- Add additional scientific datasets
+- Integrate ML pipelines for prediction and simulation
 - Extend CMS-based user interface
 - Deploy as a SaaS platform
 
 ---
 
 ## License
-This project is licensed under the Creative Commons License. See the LICENSE file for details.
+This project is licensed under the **Creative Commons** License. See the LICENSE file for details.
+Please note: The IERS data remains subject to its own attribution and usage requirements.
