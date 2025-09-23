@@ -12,6 +12,8 @@ Prototype engine to convert physics formulas into volumetric 3D outputs.
 - Interactive 3D visualization using Plotly.js
 - Mobile-accessible and cloud-deployable
 
+---
+
 ## Data Sources & Attribution
 This project integrates external datasets for visualization:
 
@@ -37,6 +39,26 @@ If you use or redistribute this project, please also credit the IERS as the orig
 
 ---
 
+### Example Usage
+
+This example shows how to fetch IERS data and generate a 3D formula dataset.
+
+```python
+# Import functions
+from engine.fetch_iers_data import fetch_iers
+from engine.compute import compute_formula_points
+
+# Fetch IERS data and save to JSON
+fetch_iers(output_path="docs/volumetric_data.json")
+print("IERS data saved to docs/volumetric_data.json")
+
+# Compute formula points
+formula_points = compute_formula_points()
+print("First 5 formula points:", formula_points[:5])
+```
+
+---
+
 ## Project Structure
 
 ```
@@ -52,6 +74,8 @@ formula-to-3d-prototype/
 ├── README.md
 └── LICENSE
 ```
+
+---
 
 ## Current Status
 - Static frontend deployed via GitHub Pages at https://toko.eckohaus.com
