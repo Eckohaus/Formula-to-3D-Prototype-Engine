@@ -56,16 +56,13 @@ formula-to-3d-prototype/
 ## Current Status
 - Static frontend deployed via GitHub Pages at https://toko.eckohaus.com
 - Volumetric displays:
-  - **Left**: IERS dataset (auto-updated daily at 02:00 UTC via GitHub Actions)
-  - **Right**: Formula placeholder array from compute.py
+  - IERS dataset (auto-updated daily at 02:00 UTC via GitHub Actions)
+  - Formula placeholder array from compute.py
 - CI/CD pipeline fetches and pushes new data to gh-pages
 
 ## Future Extensions
-- Replace placeholder formula with more complex physics models (QCD, energy fields, etc.)
-- Add additional scientific datasets
-- Integrate ML pipelines for prediction and simulation
+- Replace placeholder formula
 - Extend CMS-based user interface
-- Deploy as a SaaS platform
 
 ---
 
