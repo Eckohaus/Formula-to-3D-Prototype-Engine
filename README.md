@@ -61,8 +61,11 @@ formula-to-3d-prototype/
 - CI/CD pipeline fetches and pushes new data to gh-pages
 
 ## Future Extensions
-- Replace placeholder formula
+- Replace placeholder formula with more complex physics models (QCD, energy fields, etc.)
+- Add additional scientific datasets
+- Integrate ML pipelines for prediction and simulation
 - Extend CMS-based user interface
+- Deploy as a SaaS platform
 
 ---
 
