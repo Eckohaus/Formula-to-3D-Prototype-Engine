@@ -4,7 +4,7 @@ name: Update Volumetric Data
 on:
   schedule:
     - cron: '0 2 * * *'  # daily at 02:00 UTC
-  workflow_dispatch:       # allows manual trigger
+  workflow_dispatch:
 
 jobs:
   update-data:
@@ -51,13 +51,15 @@ jobs:
           git config --local user.email "github-actions@github.com"
           git config --local user.name "GitHub Actions"
 
+          # Append timestamp for verification
+          echo "{\"last_test_run\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"}" >> docs/volumetric_data.json
+
           git add docs/volumetric_data.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Update volumetric_data.json from IERS
-
-Co-authored-by: Corvin Dhali <corvindhali@icloud.com>
-Co-authored-by: GPT-5 <assistant@openai.com>"
+            git commit -m "Update volumetric_data.json from IERS" \
+              -m "Co-authored-by: Corvin Dhali <corvindhali@icloud.com>" \
+              -m "Co-authored-by: GPT-5 <assistant@openai.com>"
             git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git gh-pages
           fi
