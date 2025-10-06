@@ -5,51 +5,52 @@
   <title>Formula-to-3D Prototype Engine</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-  body { 
-    font-family: Arial, sans-serif; 
-    margin: 0; 
-    padding: 0; 
-    line-height: 1.5;
-    background-color: #f9f9f9;
-  }
-  header {
-    background-color: #0074D9;
-    color: white;
-    padding: 1rem;
-    text-align: center;
-  }
-  main {
-    display: flex;
-    flex-direction: column; /* stacked for mobile and desktop */
-    align-items: center;
-    padding: 1rem;
-  }
-  section.plot-section {
-    width: 90%;
-    max-width: 900px;
-    margin-bottom: 2rem;
-  }
-  .plot-container {
-    width: 100%;
-    height: 50vh; /* dynamic height: 50% of viewport height */
-    min-height: 300px; /* ensures reasonable height on small screens */
-    background-color: white;
-    border: 1px solid #ccc;
-  }
-  .description {
-    margin-top: 0.5rem;
-    font-size: 0.95rem;
-    color: #333;
-  }
-  a {
-    color: #0074D9;
-    text-decoration: none;
-  }
- </style>
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 0; 
+      padding: 0; 
+      line-height: 1.5;
+      background-color: #f9f9f9;
+    }
+    header {
+      background-color: #0074D9;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+    section.plot-section {
+      width: 90%;
+      max-width: 900px;
+      margin-bottom: 2rem;
+    }
+    .plot-container {
+      width: 100%;
+      height: 50vh;
+      min-height: 300px;
+      background-color: white;
+      border: 1px solid #ccc;
+    }
+    .description {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: #333;
+    }
+    a {
+      color: #0074D9;
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
   <header>
     <h1>Formula-to-3D Prototype Engine</h1>
+    <p>Visualising volumetric data from IERS and internal formula arrays</p>
   </header>
 
   <main>
@@ -59,7 +60,7 @@
       <div class="description">
         <strong>IERS Data:</strong> Interactive 3D plot of Earth Orientation Parameters (x_pole, y_pole, Year).<br>
         Source: <a href="https://www.iers.org" target="_blank">International Earth Rotation and Reference Systems Service (IERS)</a><br>
-        Note: The "Bulletin A" dataset is used for illustrative purposes.
+        Note: “Bulletin A” dataset is used for illustrative purposes.
       </div>
     </section>
 
@@ -67,26 +68,31 @@
     <section class="plot-section">
       <div class="plot-container" id="formulaPlot"></div>
       <div class="description">
-        <strong>Formula Data:</strong> Interactive 3D plot of physics formula, volumetric data from <code>compute.py</code>.<br>
+        <strong>Formula Data:</strong> Interactive 3D plot from internal computational arrays (<code>compute.py</code>).<br>
         <b>Labels:</b> x, y, z
       </div>
     </section>
   </main>
 
   <script>
-    fetch('volumetric_data.json')
-      .then(response => response.json())
-      .then(data => {
+    async function loadData() {
+      try {
+        // Try main path, then fallback to /docs
+        let response = await fetch('volumetric_data.json?_=' + Date.now());
+        if (!response.ok) {
+          console.warn('Primary fetch failed, trying fallback path...');
+          response = await fetch('docs/volumetric_data.json?_=' + Date.now());
+        }
+
+        const data = await response.json();
         const iersData = data.iers || [{"x":0,"y":0,"z":0}];
         const formulaData = data.formula || [{"x":0,"y":0,"z":0}];
 
-        function mapXYZ(arr) {
-          return {
-            x: arr.map(p => p.x),
-            y: arr.map(p => p.y),
-            z: arr.map(p => p.z)
-          };
-        }
+        const mapXYZ = (arr) => ({
+          x: arr.map(p => p.x),
+          y: arr.map(p => p.y),
+          z: arr.map(p => p.z)
+        });
 
         // IERS Plot
         const iersXYZ = mapXYZ(iersData);
@@ -97,7 +103,10 @@
           mode: 'markers',
           type: 'scatter3d',
           marker: { size: 3, color: iersXYZ.z, colorscale: 'Viridis', opacity: 0.8 }
-        }], { margin:{l:0,r:0,b:0,t:0}, scene:{ xaxis:{title:'x_pole'}, yaxis:{title:'y_pole'}, zaxis:{title:'Year'} } });
+        }], { 
+          margin: {l:0, r:0, b:0, t:0}, 
+          scene: { xaxis:{title:'x_pole'}, yaxis:{title:'y_pole'}, zaxis:{title:'Year'} } 
+        });
 
         // Formula Plot
         const formulaXYZ = mapXYZ(formulaData);
@@ -108,9 +117,20 @@
           mode: 'markers',
           type: 'scatter3d',
           marker: { size: 3, color: formulaXYZ.z, colorscale: 'Plasma', opacity: 0.8 }
-        }], { margin:{l:0,r:0,b:0,t:0}, scene:{ xaxis:{title:'x'}, yaxis:{title:'y'}, zaxis:{title:'z'} } });
-      })
-      .catch(err => console.error("Error loading volumetric JSON:", err));
+        }], { 
+          margin: {l:0, r:0, b:0, t:0}, 
+          scene: { xaxis:{title:'x'}, yaxis:{title:'y'}, zaxis:{title:'z'} } 
+        });
+
+        console.log("Plots rendered successfully from volumetric_data.json");
+
+      } catch (err) {
+        console.error("Error loading volumetric JSON:", err);
+        document.body.insertAdjacentHTML('beforeend', '<p style="color:red;text-align:center;">⚠️ Error loading volumetric data.</p>');
+      }
+    }
+
+    loadData();
   </script>
 </body>
 </html>
