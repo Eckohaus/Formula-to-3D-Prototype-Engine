@@ -5,10 +5,10 @@
   <title>Formula-to-3D Prototype Engine</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      margin: 0; 
-      padding: 0; 
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
       line-height: 1.5;
       background-color: #f9f9f9;
     }
@@ -41,6 +41,11 @@
       font-size: 0.95rem;
       color: #333;
     }
+    .error {
+      color: red;
+      text-align: center;
+      margin-top: 2rem;
+    }
     a {
       color: #0074D9;
       text-decoration: none;
@@ -50,7 +55,6 @@
 <body>
   <header>
     <h1>Formula-to-3D Prototype Engine</h1>
-    <p>Visualising volumetric data from IERS and internal formula arrays</p>
   </header>
 
   <main>
@@ -58,9 +62,8 @@
     <section class="plot-section">
       <div class="plot-container" id="iersPlot"></div>
       <div class="description">
-        <strong>IERS Data:</strong> Interactive 3D plot of Earth Orientation Parameters (x_pole, y_pole, Year).<br>
-        Source: <a href="https://www.iers.org" target="_blank">International Earth Rotation and Reference Systems Service (IERS)</a><br>
-        Note: “Bulletin A” dataset is used for illustrative purposes.
+        <strong>IERS Data:</strong> Interactive 3D plot of Earth Orientation Parameters (<code>x_pole</code>, <code>y_pole</code>, <code>Year</code>).<br>
+        Source: <a href="https://www.iers.org" target="_blank">International Earth Rotation and Reference Systems Service (IERS)</a>
       </div>
     </section>
 
@@ -68,31 +71,32 @@
     <section class="plot-section">
       <div class="plot-container" id="formulaPlot"></div>
       <div class="description">
-        <strong>Formula Data:</strong> Interactive 3D plot from internal computational arrays (<code>compute.py</code>).<br>
+        <strong>Formula Data:</strong> Interactive 3D plot generated from <code>compute.py</code>.<br>
         <b>Labels:</b> x, y, z
       </div>
     </section>
+
+    <div id="errorMsg" class="error" style="display:none;">⚠️ Error loading volumetric data.</div>
   </main>
 
   <script>
-    async function loadData() {
-      try {
-        // Try main path, then fallback to /docs
-        let response = await fetch('volumetric_data.json?_=' + Date.now());
-        if (!response.ok) {
-          console.warn('Primary fetch failed, trying fallback path...');
-          response = await fetch('docs/volumetric_data.json?_=' + Date.now());
+    // Fetch JSON file (relative path so it works on GitHub Pages)
+    fetch('./volumetric_data.json')
+      .then(response => {
+        if (!response.ok) throw new Error("JSON not found");
+        return response.json();
+      })
+      .then(data => {
+        const iersData = data.iers || [];
+        const formulaData = data.formula || [];
+
+        function mapXYZ(arr) {
+          return {
+            x: arr.map(p => p.x),
+            y: arr.map(p => p.y),
+            z: arr.map(p => p.z)
+          };
         }
-
-        const data = await response.json();
-        const iersData = data.iers || [{"x":0,"y":0,"z":0}];
-        const formulaData = data.formula || [{"x":0,"y":0,"z":0}];
-
-        const mapXYZ = (arr) => ({
-          x: arr.map(p => p.x),
-          y: arr.map(p => p.y),
-          z: arr.map(p => p.z)
-        });
 
         // IERS Plot
         const iersXYZ = mapXYZ(iersData);
@@ -102,10 +106,19 @@
           z: iersXYZ.z,
           mode: 'markers',
           type: 'scatter3d',
-          marker: { size: 3, color: iersXYZ.z, colorscale: 'Viridis', opacity: 0.8 }
-        }], { 
-          margin: {l:0, r:0, b:0, t:0}, 
-          scene: { xaxis:{title:'x_pole'}, yaxis:{title:'y_pole'}, zaxis:{title:'Year'} } 
+          marker: {
+            size: 3,
+            color: iersXYZ.z,
+            colorscale: 'Viridis',
+            opacity: 0.8
+          }
+        }], {
+          margin: { l: 0, r: 0, b: 0, t: 0 },
+          scene: {
+            xaxis: { title: 'x_pole' },
+            yaxis: { title: 'y_pole' },
+            zaxis: { title: 'Year' }
+          }
         });
 
         // Formula Plot
@@ -116,21 +129,25 @@
           z: formulaXYZ.z,
           mode: 'markers',
           type: 'scatter3d',
-          marker: { size: 3, color: formulaXYZ.z, colorscale: 'Plasma', opacity: 0.8 }
-        }], { 
-          margin: {l:0, r:0, b:0, t:0}, 
-          scene: { xaxis:{title:'x'}, yaxis:{title:'y'}, zaxis:{title:'z'} } 
+          marker: {
+            size: 3,
+            color: formulaXYZ.z,
+            colorscale: 'Plasma',
+            opacity: 0.8
+          }
+        }], {
+          margin: { l: 0, r: 0, b: 0, t: 0 },
+          scene: {
+            xaxis: { title: 'x' },
+            yaxis: { title: 'y' },
+            zaxis: { title: 'z' }
+          }
         });
-
-        console.log("Plots rendered successfully from volumetric_data.json");
-
-      } catch (err) {
-        console.error("Error loading volumetric JSON:", err);
-        document.body.insertAdjacentHTML('beforeend', '<p style="color:red;text-align:center;">⚠️ Error loading volumetric data.</p>');
-      }
-    }
-
-    loadData();
+      })
+      .catch(err => {
+        console.error("Error loading volumetric data:", err);
+        document.getElementById('errorMsg').style.display = 'block';
+      });
   </script>
 </body>
 </html>
