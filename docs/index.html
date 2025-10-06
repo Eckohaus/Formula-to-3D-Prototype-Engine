@@ -41,14 +41,21 @@
       font-size: 0.95rem;
       color: #333;
     }
+    .status-box {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      color: #222;
+      margin-top: 1rem;
+      width: 90%;
+      max-width: 900px;
+      border-radius: 4px;
+    }
     .error {
       color: red;
       text-align: center;
-      margin-top: 2rem;
-    }
-    a {
-      color: #0074D9;
-      text-decoration: none;
+      margin-top: 1rem;
     }
   </style>
 </head>
@@ -58,21 +65,19 @@
   </header>
 
   <main>
-    <!-- IERS Data Section -->
+    <div id="statusBox" class="status-box">🕓 Checking data source...</div>
+
     <section class="plot-section">
       <div class="plot-container" id="iersPlot"></div>
       <div class="description">
-        <strong>IERS Data:</strong> Interactive 3D plot of Earth Orientation Parameters (<code>x_pole</code>, <code>y_pole</code>, <code>Year</code>).<br>
-        Source: <a href="https://www.iers.org" target="_blank">International Earth Rotation and Reference Systems Service (IERS)</a>
+        <strong>IERS Data:</strong> 3D plot of Earth Orientation Parameters (<code>x_pole</code>, <code>y_pole</code>, <code>Year</code>).
       </div>
     </section>
 
-    <!-- Formula Data Section -->
     <section class="plot-section">
       <div class="plot-container" id="formulaPlot"></div>
       <div class="description">
-        <strong>Formula Data:</strong> Interactive 3D plot generated from <code>compute.py</code>.<br>
-        <b>Labels:</b> x, y, z
+        <strong>Formula Data:</strong> Generated from <code>compute.py</code> (x, y, z).
       </div>
     </section>
 
@@ -80,72 +85,78 @@
   </main>
 
   <script>
-    // Dynamically detect JSON path (works for both root and /docs/)
-    const jsonPaths = [
-      './volumetric_data.json',
-      './docs/volumetric_data.json',
-      'volumetric_data.json'
-    ];
+    async function loadData() {
+      const statusBox = document.getElementById('statusBox');
+      const paths = [
+        './volumetric_data.json',
+        './docs/volumetric_data.json',
+        '/volumetric_data.json',
+        'https://toko.eckohaus.com/volumetric_data.json'
+      ];
 
-    async function fetchJSON(paths) {
+      let data = null;
+      let usedPath = null;
+      let lastError = null;
+
       for (const path of paths) {
         try {
-          const response = await fetch(path + '?t=' + Date.now());
-          if (response.ok) return await response.json();
-        } catch (e) {
-          console.warn('Path failed:', path);
+          statusBox.innerText = `🔍 Trying: ${path}`;
+          const resp = await fetch(path + '?cache=' + Date.now());
+          if (resp.ok) {
+            data = await resp.json();
+            usedPath = path;
+            break;
+          } else {
+            lastError = `HTTP ${resp.status}`;
+          }
+        } catch (err) {
+          lastError = err.message;
         }
       }
-      throw new Error('No valid volumetric_data.json found');
+
+      if (!data) {
+        statusBox.innerText = `❌ Failed to load data.\nLast error: ${lastError}`;
+        document.getElementById('errorMsg').style.display = 'block';
+        return;
+      }
+
+      statusBox.innerText = `✅ Loaded JSON successfully from: ${usedPath}
+IERS points: ${(data.iers || []).length}
+Formula points: ${(data.formula || []).length}`;
+
+      // Mapping function
+      function mapXYZ(arr) {
+        return { x: arr.map(p => p.x), y: arr.map(p => p.y), z: arr.map(p => p.z) };
+      }
+
+      // Plot IERS Data
+      if (data.iers && data.iers.length > 0) {
+        const iersXYZ = mapXYZ(data.iers);
+        Plotly.newPlot('iersPlot', [{
+          x: iersXYZ.x,
+          y: iersXYZ.y,
+          z: iersXYZ.z,
+          mode: 'markers',
+          type: 'scatter3d',
+          marker: { size: 3, color: iersXYZ.z, colorscale: 'Viridis', opacity: 0.8 }
+        }], { margin: { l: 0, r: 0, b: 0, t: 0 } });
+      }
+
+      // Plot Formula Data
+      if (data.formula && data.formula.length > 0) {
+        const formulaXYZ = mapXYZ(data.formula);
+        Plotly.newPlot('formulaPlot', [{
+          x: formulaXYZ.x,
+          y: formulaXYZ.y,
+          z: formulaXYZ.z,
+          mode: 'markers',
+          type: 'scatter3d',
+          marker: { size: 3, color: formulaXYZ.z, colorscale: 'Plasma', opacity: 0.8 }
+        }], { margin: { l: 0, r: 0, b: 0, t: 0 } });
+      }
     }
 
-    fetchJSON(jsonPaths)
-      .then(data => {
-        const iersData = Array.isArray(data.iers) ? data.iers : [];
-        const formulaData = Array.isArray(data.formula) ? data.formula : [];
-
-        function mapXYZ(arr) {
-          return {
-            x: arr.map(p => p.x),
-            y: arr.map(p => p.y),
-            z: arr.map(p => p.z)
-          };
-        }
-
-        if (iersData.length === 0 && formulaData.length === 0) {
-          throw new Error("No data arrays found in JSON");
-        }
-
-        // IERS Plot
-        if (iersData.length > 0) {
-          const iersXYZ = mapXYZ(iersData);
-          Plotly.newPlot('iersPlot', [{
-            x: iersXYZ.x,
-            y: iersXYZ.y,
-            z: iersXYZ.z,
-            mode: 'markers',
-            type: 'scatter3d',
-            marker: { size: 3, color: iersXYZ.z, colorscale: 'Viridis', opacity: 0.8 }
-          }], { margin:{l:0,r:0,b:0,t:0}, scene:{ xaxis:{title:'x_pole'}, yaxis:{title:'y_pole'}, zaxis:{title:'Year'} } });
-        }
-
-        // Formula Plot
-        if (formulaData.length > 0) {
-          const formulaXYZ = mapXYZ(formulaData);
-          Plotly.newPlot('formulaPlot', [{
-            x: formulaXYZ.x,
-            y: formulaXYZ.y,
-            z: formulaXYZ.z,
-            mode: 'markers',
-            type: 'scatter3d',
-            marker: { size: 3, color: formulaXYZ.z, colorscale: 'Plasma', opacity: 0.8 }
-          }], { margin:{l:0,r:0,b:0,t:0}, scene:{ xaxis:{title:'x'}, yaxis:{title:'y'}, zaxis:{title:'z'} } });
-        }
-      })
-      .catch(err => {
-        console.error("Error loading volumetric data:", err);
-        document.getElementById('errorMsg').style.display = 'block';
-      });
+    loadData();
   </script>
 </body>
 </html>
