@@ -47,27 +47,26 @@ jobs:
       # Step 6: Commit & push changes
       - name: Commit & push changes
         working-directory: gh-pages
+        shell: bash
         run: |
           git config --local user.email "github-actions@github.com"
           git config --local user.name "GitHub Actions"
 
-          # Safely insert timestamp inside existing JSON structure
-          python - <<'PYCODE'
-import json, datetime, pathlib
-p = pathlib.Path("docs/volumetric_data.json")
-data = json.loads(p.read_text())
-data["last_test_run"] = datetime.datetime.utcnow().isoformat() + "Z"
-p.write_text(json.dumps(data, indent=2))
-PYCODE
+          # Safely insert timestamp inside existing JSON structure using inline Python
+          python -c "import json, datetime, pathlib; \
+          p=pathlib.Path('docs/volumetric_data.json'); \
+          data=json.loads(p.read_text()); \
+          data['last_test_run']=datetime.datetime.utcnow().isoformat()+'Z'; \
+          p.write_text(json.dumps(data, indent=2))"
 
           git add docs/volumetric_data.json
           if git diff --cached --quiet; then
-            echo "No changes to commit"
+            echo 'No changes to commit'
           else
-            git commit -m "Update volumetric_data.json from IERS" \
-              -m "ci: fix JSON timestamp insertion for volumetric_data.json" \
-              -m "This update replaces the previous echo-based timestamp append with a proper in-place JSON merge using Python, ensuring that volumetric_data.json remains valid and parseable for Plotly." \
-              -m "Co-authored-by: Corvin Dhali <info@eckohaus.blog>" \
-              -m "Co-authored-by: GPT-5 <assistant@openai.com>"
+            git commit -m 'Update volumetric_data.json from IERS' \
+              -m 'ci: fix JSON timestamp insertion for volumetric_data.json' \
+              -m 'This update replaces the previous echo-based timestamp append with a proper in-place JSON merge using Python, ensuring that volumetric_data.json remains valid and parseable for Plotly.' \
+              -m 'Co-authored-by: Corvin Dhali <info@eckohaus.blog>' \
+              -m 'Co-authored-by: GPT-5 <assistant@openai.com>'
             git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git gh-pages
           fi
