@@ -51,14 +51,14 @@ jobs:
           git config --local user.email "github-actions@github.com"
           git config --local user.name "GitHub Actions"
 
-          # Append a timestamp to verify commit and push
+          # Append a test timestamp to verify commit and push
           echo "{\"last_test_run\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"}" >> docs/volumetric_data.json
 
           git add docs/volumetric_data.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore: update volumetric_data.json via scheduled workflow" \
-              -m "This commit updates the volumetric_data.json file with the latest IERS Earth Orientation Parameters (EOP) and regenerates computed data. Triggered automatically by GitHub Actions using the built-in GITHUB_TOKEN. Includes refreshed IERS data, computed formula points, and a UTC timestamp for traceability."
+            git commit -m "ASTF: Automated volumetric data regeneration" \
+              -m "Regenerates volumetric_data.json using the latest IERS Earth Orientation Parameters (EOP) and formula-array computations from the Formula-to-3D Prototype Engine. Executed by scheduled GitHub Action at 02:00 UTC via GITHUB_TOKEN. Ensures data continuity, reproducibility, and version traceability within the ASTF framework."
             git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages
           fi
