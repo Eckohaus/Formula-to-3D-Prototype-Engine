@@ -80,15 +80,29 @@
   </main>
 
   <script>
-    // Fetch JSON file (relative path so it works on GitHub Pages)
-    fetch('./volumetric_data.json')
-      .then(response => {
-        if (!response.ok) throw new Error("JSON not found");
-        return response.json();
-      })
+    // Dynamically detect JSON path (works for both root and /docs/)
+    const jsonPaths = [
+      './volumetric_data.json',
+      './docs/volumetric_data.json',
+      'volumetric_data.json'
+    ];
+
+    async function fetchJSON(paths) {
+      for (const path of paths) {
+        try {
+          const response = await fetch(path + '?t=' + Date.now());
+          if (response.ok) return await response.json();
+        } catch (e) {
+          console.warn('Path failed:', path);
+        }
+      }
+      throw new Error('No valid volumetric_data.json found');
+    }
+
+    fetchJSON(jsonPaths)
       .then(data => {
-        const iersData = data.iers || [];
-        const formulaData = data.formula || [];
+        const iersData = Array.isArray(data.iers) ? data.iers : [];
+        const formulaData = Array.isArray(data.formula) ? data.formula : [];
 
         function mapXYZ(arr) {
           return {
@@ -98,51 +112,35 @@
           };
         }
 
+        if (iersData.length === 0 && formulaData.length === 0) {
+          throw new Error("No data arrays found in JSON");
+        }
+
         // IERS Plot
-        const iersXYZ = mapXYZ(iersData);
-        Plotly.newPlot('iersPlot', [{
-          x: iersXYZ.x,
-          y: iersXYZ.y,
-          z: iersXYZ.z,
-          mode: 'markers',
-          type: 'scatter3d',
-          marker: {
-            size: 3,
-            color: iersXYZ.z,
-            colorscale: 'Viridis',
-            opacity: 0.8
-          }
-        }], {
-          margin: { l: 0, r: 0, b: 0, t: 0 },
-          scene: {
-            xaxis: { title: 'x_pole' },
-            yaxis: { title: 'y_pole' },
-            zaxis: { title: 'Year' }
-          }
-        });
+        if (iersData.length > 0) {
+          const iersXYZ = mapXYZ(iersData);
+          Plotly.newPlot('iersPlot', [{
+            x: iersXYZ.x,
+            y: iersXYZ.y,
+            z: iersXYZ.z,
+            mode: 'markers',
+            type: 'scatter3d',
+            marker: { size: 3, color: iersXYZ.z, colorscale: 'Viridis', opacity: 0.8 }
+          }], { margin:{l:0,r:0,b:0,t:0}, scene:{ xaxis:{title:'x_pole'}, yaxis:{title:'y_pole'}, zaxis:{title:'Year'} } });
+        }
 
         // Formula Plot
-        const formulaXYZ = mapXYZ(formulaData);
-        Plotly.newPlot('formulaPlot', [{
-          x: formulaXYZ.x,
-          y: formulaXYZ.y,
-          z: formulaXYZ.z,
-          mode: 'markers',
-          type: 'scatter3d',
-          marker: {
-            size: 3,
-            color: formulaXYZ.z,
-            colorscale: 'Plasma',
-            opacity: 0.8
-          }
-        }], {
-          margin: { l: 0, r: 0, b: 0, t: 0 },
-          scene: {
-            xaxis: { title: 'x' },
-            yaxis: { title: 'y' },
-            zaxis: { title: 'z' }
-          }
-        });
+        if (formulaData.length > 0) {
+          const formulaXYZ = mapXYZ(formulaData);
+          Plotly.newPlot('formulaPlot', [{
+            x: formulaXYZ.x,
+            y: formulaXYZ.y,
+            z: formulaXYZ.z,
+            mode: 'markers',
+            type: 'scatter3d',
+            marker: { size: 3, color: formulaXYZ.z, colorscale: 'Plasma', opacity: 0.8 }
+          }], { margin:{l:0,r:0,b:0,t:0}, scene:{ xaxis:{title:'x'}, yaxis:{title:'y'}, zaxis:{title:'z'} } });
+        }
       })
       .catch(err => {
         console.error("Error loading volumetric data:", err);
