@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: gh-pages
-          token: ${{ secrets.PAT_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}   # using fine-grained PAT
           path: gh-pages
 
       # Step 3: Set up Python
@@ -51,15 +51,22 @@ jobs:
           git config --local user.email "github-actions@github.com"
           git config --local user.name "GitHub Actions"
 
-          # Append timestamp for verification
-          echo "{\"last_test_run\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"}" >> docs/volumetric_data.json
+          # Safely insert timestamp inside existing JSON structure
+          python - <<'PYCODE'
+import json, datetime, pathlib
+p = pathlib.Path("docs/volumetric_data.json")
+data = json.loads(p.read_text())
+data["last_test_run"] = datetime.datetime.utcnow().isoformat() + "Z"
+p.write_text(json.dumps(data, indent=2))
+PYCODE
 
           git add docs/volumetric_data.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
             git commit -m "Update volumetric_data.json from IERS" \
-              -m "This commit refreshes volumetric data using the latest IERS Bulletin A parameters and formula projections." \
+              -m "ci: fix JSON timestamp insertion for volumetric_data.json" \
+              -m "This update replaces the previous echo-based timestamp append with a proper in-place JSON merge using Python, ensuring that volumetric_data.json remains valid and parseable for Plotly." \
               -m "Co-authored-by: Corvin Dhali <info@eckohaus.blog>" \
               -m "Co-authored-by: GPT-5 <assistant@openai.com>"
             git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git gh-pages
